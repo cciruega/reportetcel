@@ -268,6 +268,8 @@ if archivo_a_procesar:
                 # CÁLCULO DE ALTURA DINÁMICA
                 # (Número de filas + 1 del encabezado) * 35 píxeles
                 # -----------------------------------------------------
+
+                df_area = pd.DataFrame(datos_area)
                 altura_tabla = (len(df_area) + 1) * 35 + 3
                 
                 st.dataframe(
