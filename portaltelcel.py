@@ -194,7 +194,7 @@ if archivo_a_procesar:
                 total_asesores = 0
                 total_meta = 0
                 
-                for cac in cacs:
+for cac in cacs:
                     avance_fila = resumen_cacs[resumen_cacs['NOM_ESTRATEGIA'] == cac]
                     avance = avance_fila['Avance Mes'].values[0] if not avance_fila.empty else 0
                     
@@ -202,12 +202,12 @@ if archivo_a_procesar:
                     meta = asesores * 2
                     
                     porcentaje = (avance / meta) if meta > 0 else 0
-
+                    
                     # Buscamos el nombre limpio, si por alguna razón no existe, deja el nombre original
                     nombre_mostrar = nombres_simples.get(cac, cac)
                     
                     datos_area.append({
-                        "Area/CAC": cac,
+                        "Area/CAC": nombre_mostrar, # <-- Aquí usamos el nombre limpio
                         "Avance Mes": avance,
                         "Asesores": asesores,
                         "Meta": meta,
