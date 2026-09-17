@@ -136,7 +136,7 @@ if archivo_a_procesar:
             
             resumen_cacs = df_filtrado.groupby('NOM_ESTRATEGIA').size().reset_index(name='Avance Mes')
             
-            st.header("Resultados por AREA_PDV")
+            st.header("Resultados por CAC asociado al Area TMX")
             
             for area, cacs in estructura_cac.items():
                 st.subheader(area)
