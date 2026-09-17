@@ -1,6 +1,9 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
+import datetime
+import requests
+import zipfile
+import io
 
 st.set_page_config(page_title="Dashboard de Resultados", layout="wide")
 
@@ -16,108 +19,114 @@ estructura_cac = {
 }
 
 catalogo_asesores = {
-    # CIUDAD VICTORIA
     "2008604 TCC CIU100 MANTE4": 17, "2008604 TCC CIU100 VICTORIA II4": 19, "2008604 TCC CIU100 VICTORIA4": 28,
-    # MATAMOROS-REYNOSA
     "2008604 TCC MAT101 MATAMOROS II4": 21, "2008604 TCC MAT101 MATAMOROS4": 19, "2008604 TCC REY115 REYNOSA II4": 15, "2008604 TCC REY115 REYNOSA III4": 20, "2008604 TCC REY116 REYNOSA I4": 14, "2008604 TCC REY116 REYNOSA IV4": 16,
-    # MONTERREY 1
     "2008604 TCC MON103 COUNTRY4": 22, "2008604 TCC MON103 EXPRESS ESFERA4": 10, "2008604 TCC MON103 EXPRESS NUEVO SUR4": 7, "2008604 TCC MON103 SATELITE4": 14, "2008604 TCC MON103 VALLE ORIENTE4": 14, "2008604 TCC MON104 CUMBRES4": 29, "2008604 TCC MON104 SENDERO LINCOLN4": 30, "2008604 TCC MON104 SERVICIO TECNICO Tlc Y CENTRo": 19, "2008604 TCC MON105 CENTRIKA4": 15, "2008604 TCC MON105 GALERIAS4": 25, "2008604 TCC MON106 CENTRO4": 24, "2008604 TCC MON106 EXPRESS FASHION DRIVE4": 6, "2008604 TCC MON106 EXPRESS HUMBERTO LOBO4": 13, "2008604 TCC MON106 EXPRESS PASEO TEC": 7, "2008604 TCC MON106 EXPRESS VILLAS VALLE4": 4, "2008604 TCC MON106 PUNTO VALLE4": 11, "2008604 TCC MON106 SAN AGUSTIN4": 18,
-    # MONTERREY 2
     "2008604 TCC MON107 EXPOSICION4": 20, "2008604 TCC MON107 GUADALUPE4": 28, "2008604 TCC MON108 ANAHUAC4": 20, "2008604 TCC MON108 EXPRESS PLAZA FIESTA ANAHUAC4": 8, "2008604 TCC MON108 PLAZA BELLA4": 27, "2008604 TCC MON108 SANTA CATARINA4": 23, "2008604 TCC MON109 CITADEL4": 25, "2008604 TCC MON109 LAS AMERICAS4": 20, "2008604 TCC MON110 ESCOBEDO4": 20,
-    # MONTERREY 3
     "2008604 TCC MON111 APODACA4": 26, "2008604 TCC MON111 MTY SUN MALL VIP4": 20, "2008604 TCC MON112 EXPRESS MONTEMORELOS": 7,
-    # NUEVO LAREDO
     "2008604 TCC NUE114 LAREDO I4": 9, "2008604 TCC NUE114 LAREDO II4": 15,
-    # TAMPICO
     "2008604 TCC TAM121 TAMPICO I4": 34, "2008604 TCC TAM122 TAMPICO II4": 20, "2008604 TCC TAM122 TAMPICO III4": 23, "2008604 TCC TAM122 TAMPICO IV4": 23
 }
 
 st.title("Portal de Resultados Operativos")
 
+# Función para cargar el archivo sorteando las primeras filas vacías
+def cargar_datos(archivo):
+    df_temp = pd.read_excel(archivo, sheet_name="Base", header=2)
+    if 'NOM_ESTRATEGIA' in df_temp.columns:
+        return df_temp
+    else:
+        return pd.read_excel(archivo, sheet_name="Base")
+
 # ---------------------------------------------------------
 # ☁️ LÓGICA DE DETECCIÓN AUTOMÁTICA (CLARO DRIVE)
 # ---------------------------------------------------------
+@st.cache_data(ttl=600) # Cacheamos por 10 mins para no saturar ClaroDrive
 def obtener_archivo_clarodrive():
-    # Truco de ClaroDrive: Agregamos /download a tu liga para bajar la carpeta
-    url_carpeta = "https://i0000.clarodrive.com/s/FSXKpraaEE8owPZ"
-    url_descarga = url_carpeta.rstrip('/') + '/download'
-    
-    try:
-        respuesta = requests.get(url_descarga, timeout=15)
-        if respuesta.status_code == 200:
-            # Leemos el archivo ZIP directamente en la memoria del servidor
-            with zipfile.ZipFile(io.BytesIO(respuesta.content)) as archivo_zip:
-                # Buscamos todos los archivos Excel (ignorando los temporales que empiezan con ~)
-                excel_infos = [info for info in archivo_zip.infolist() if info.filename.endswith('.xlsx') and not info.filename.startswith('~')]
-                
-                if excel_infos:
-                    # Si hay varios, tomamos el más reciente por fecha de modificación
-                    excel_reciente = max(excel_infos, key=lambda x: x.date_time)
-                    
-                    # Lo extraemos a la memoria
-                    archivo_bytes = io.BytesIO(archivo_zip.read(excel_reciente.filename))
-                    
-                    # =========================================================
-                    # 🕒 AJUSTE DE ZONA HORARIA (UTC A CENTRO DE MÉXICO)
-                    # =========================================================
-                    fecha_tupla = excel_reciente.date_time 
-                    
-                    # 1. Convertimos la tupla del ZIP a un formato de fecha manipulable
-                    fecha_utc = datetime.datetime(
-                        year=fecha_tupla[0], month=fecha_tupla[1], day=fecha_tupla[2],
-                        hour=fecha_tupla[3], minute=fecha_tupla[4], second=fecha_tupla[5]
-                    )
-                    
-                    # 2. Le restamos 6 horas (Diferencia de México respecto a UTC)
-                    fecha_mexico = fecha_utc - datetime.timedelta(hours=6)
-                    
-                    # 3. Lo convertimos al texto final
-                    fecha_str = fecha_mexico.strftime('%d/%m/%Y %H:%M:%S')
-                    # =========================================================
-                    
-                    return archivo_bytes, excel_reciente.filename, fecha_str
-    except Exception:
-        pass # Si falla el internet del servidor o la liga, no rompe el programa
-    
-    return None, None, None
+    # Truco de ClaroDrive: Agregamos /download a tu liga para bajar la carpeta
+    url_carpeta = "https://i0000.clarodrive.com/s/FSXKpraaEE8owPZ"
+    url_descarga = url_carpeta.rstrip('/') + '/download'
+    
+    try:
+        respuesta = requests.get(url_descarga, timeout=15)
+        if respuesta.status_code == 200:
+            # Leemos el archivo ZIP directamente en la memoria del servidor
+            with zipfile.ZipFile(io.BytesIO(respuesta.content)) as archivo_zip:
+                # Buscamos todos los archivos Excel (ignorando los temporales que empiezan con ~)
+                excel_infos = [info for info in archivo_zip.infolist() if info.filename.endswith('.xlsx') and not info.filename.startswith('~')]
+                
+                if excel_infos:
+                    # Si hay varios, tomamos el más reciente por fecha de modificación
+                    excel_reciente = max(excel_infos, key=lambda x: x.date_time)
+                    
+                    # Lo extraemos a la memoria
+                    archivo_bytes = io.BytesIO(archivo_zip.read(excel_reciente.filename))
+                    
+                    # =========================================================
+                    # 🕒 AJUSTE DE ZONA HORARIA (UTC A CENTRO DE MÉXICO)
+                    # =========================================================
+                    fecha_tupla = excel_reciente.date_time 
+                    
+                    # 1. Convertimos la tupla del ZIP a un formato de fecha manipulable
+                    fecha_utc = datetime.datetime(
+                        year=fecha_tupla[0], month=fecha_tupla[1], day=fecha_tupla[2],
+                        hour=fecha_tupla[3], minute=fecha_tupla[4], second=fecha_tupla[5]
+                    )
+                    
+                    # 2. Le restamos 6 horas (Diferencia de México respecto a UTC)
+                    fecha_mexico = fecha_utc - datetime.timedelta(hours=6)
+                    
+                    # 3. Lo convertimos al texto final
+                    fecha_str = fecha_mexico.strftime('%d/%m/%Y %H:%M:%S')
+                    # =========================================================
+                    
+                    return archivo_bytes.getvalue(), excel_reciente.filename, fecha_str
+    except Exception:
+        pass # Si falla el internet del servidor o la liga, no rompe el programa
+    
+    return None, None, None
 
-archivo_automatico, nombre_corto, fecha_actualizacion = obtener_archivo_clarodrive()
+# Obtenemos los bytes en lugar del objeto BytesIO para que Streamlit pueda cachear
+bytes_automatico, nombre_corto, fecha_actualizacion = obtener_archivo_clarodrive()
 archivo_a_procesar = None
 
 col1, col2 = st.columns([2, 1])
 with col1:
-    if archivo_automatico:
-        st.success(f"☁️ **Base de datos:** {nombre_corto}  \n⏱️ **Actualizado:** {fecha_actualizacion}")
-        archivo_a_procesar = archivo_automatico
-    else:
-        st.warning("⚠️ No se pudo conectar con Claro Drive o la carpeta está vacía.")
+    if bytes_automatico:
+        # Reconstruimos el BytesIO a partir de los bytes cacheados
+        archivo_automatico = io.BytesIO(bytes_automatico)
+        st.success(f"☁️ **Base de datos (Claro Drive):** {nombre_corto}  \n⏱️ **Actualizado:** {fecha_actualizacion}")
+        archivo_a_procesar = archivo_automatico
+    else:
+        st.warning("⚠️ No se pudo conectar con Claro Drive o la carpeta está vacía.")
 
 with col2:
-    # Si Claro Drive falla, habilitamos la subida manual como "Plan B"
-    usar_manual = st.checkbox("Subir archivo manualmente", value=False if archivo_automatico else True)
+    # Si Claro Drive falla, habilitamos la subida manual como "Plan B"
+    usar_manual = st.checkbox("Subir archivo manualmente", value=False if bytes_automatico else True)
 
 if usar_manual:
-    archivo_a_procesar = st.file_uploader("Arrastra aquí tu archivo de Excel", type=['xlsx'])
+    archivo_a_procesar = st.file_uploader("Arrastra aquí tu archivo de Excel", type=['xlsx', 'xls'])
 
 st.divider()
 
 # ---------------------------------------------------------
+# PROCESAMIENTO DEL ARCHIVO
+# ---------------------------------------------------------
+if archivo_a_procesar:
+    try:
+        df = cargar_datos(archivo_a_procesar)
         
-        # 3. Filtros en la barra lateral
         st.sidebar.header("Filtros Principales")
         
         if 'MES_CAPTURA' in df.columns:
-            # Asegurar formato de fecha para extraer los meses limpios
             df['MES_CAPTURA'] = pd.to_datetime(df['MES_CAPTURA'], errors='coerce')
             meses_disponibles = sorted(df['MES_CAPTURA'].dt.month.dropna().unique().astype(int).tolist())
-            mes_actual = datetime.now().month
+            mes_actual = datetime.datetime.now().month
             
-            # Buscar el mes actual (si está) o seleccionar el último disponible por defecto
             default_index = meses_disponibles.index(mes_actual) if mes_actual in meses_disponibles else (len(meses_disponibles)-1 if meses_disponibles else 0)
             
             mes_seleccionado = st.sidebar.selectbox("Mes de Captura (Número)", meses_disponibles, index=default_index)
             
-            # Filtrar DataFrame por el mes seleccionado
             df_filtrado = df[df['MES_CAPTURA'].dt.month == mes_seleccionado]
         else:
             st.error("La columna 'MES_CAPTURA' no se encontró. Verifica el formato del archivo.")
@@ -125,8 +134,6 @@ st.divider()
 
         if 'NOM_ESTRATEGIA' in df_filtrado.columns:
             
-            # CÁLCULO DEL PORTAL: Agrupar el acumulado para contar los registros por CAC
-            # Usamos 'size' para contar el total de solicitudes/ventas en ese mes
             resumen_cacs = df_filtrado.groupby('NOM_ESTRATEGIA').size().reset_index(name='Avance Mes')
             
             st.header("Resultados por AREA_PDV")
@@ -140,7 +147,6 @@ st.divider()
                 total_meta = 0
                 
                 for cac in cacs:
-                    # Buscar el avance calculado para el CAC actual
                     avance_fila = resumen_cacs[resumen_cacs['NOM_ESTRATEGIA'] == cac]
                     avance = avance_fila['Avance Mes'].values[0] if not avance_fila.empty else 0
                     
@@ -186,4 +192,4 @@ st.divider()
     except Exception as e:
         st.error(f"Hubo un problema al leer el archivo. Error técnico: {e}")
 else:
-    st.info("Sube el archivo de Excel para visualizar los tableros.")
+    st.info("Obteniendo datos de Claro Drive o en espera de subida manual...")
