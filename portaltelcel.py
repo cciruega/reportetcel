@@ -248,12 +248,27 @@ if archivo_a_procesar:
                     
                 df_area = pd.DataFrame(datos_area)
                 
+                # -----------------------------------------------------
+                # CÁLCULO DE ALTURA DINÁMICA
+                # (Número de filas + 1 del encabezado) * 35 píxeles
+                # -----------------------------------------------------
                 altura_tabla = (len(df_area) + 1) * 35 + 3
+                
+                # Creación ÚNICA de la tabla con todos los formatos visuales (Semáforo y Barra)
                 st.dataframe(
-                    df_area.style.format({"Avance": "{:.0%}"}),
+                    df_area.style.format({"Avance": "{:.0%}"}).map(colorear_semaforo, subset=['Avance']),
                     use_container_width=True,
                     hide_index=True,
-                    height=altura_tabla
+                    height=altura_tabla,
+                    column_config={
+                        "Avance": st.column_config.ProgressColumn(
+                            "Avance",
+                            help="Cumplimiento de la meta",
+                            format="%.2f", 
+                            min_value=0,
+                            max_value=1,   
+                        )
+                    }
                 )
                 st.markdown("---")
             
@@ -264,30 +279,6 @@ if archivo_a_procesar:
             df_ranking = df_ranking.sort_values(by="Cumplimiento %", ascending=False)
             st.bar_chart(df_ranking.set_index("Área")["Cumplimiento %"])
                 
-                # -----------------------------------------------------
-                # CÁLCULO DE ALTURA DINÁMICA
-                # (Número de filas + 1 del encabezado) * 35 píxeles
-                # -----------------------------------------------------
-
-                df_area = pd.DataFrame(datos_area)
-                altura_tabla = (len(df_area) + 1) * 35 + 3
-                
-                st.dataframe(
-                    df_area.style.format({"Avance": "{:.0%}"}).map(colorear_semaforo, subset=['Avance']),
-                    use_container_width=True,
-                    hide_index=True,
-                    height=altura_tabla,
-                    column_config={
-                        "Avance": st.column_config.ProgressColumn(
-                            "Avance",
-                            help="Cumplimiento de la meta",
-                            format="%.2f", # Muestra decimales
-                            min_value=0,
-                            max_value=1,   # Asume que el porcentaje es base 1 (ej. 0.38)
-                        )
-                    }
-                )
-                st.markdown("---")
         else:
             st.error("La columna 'NOM_ESTRATEGIA' no se encontró en la base de datos.")
 
