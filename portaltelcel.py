@@ -7,6 +7,17 @@ import io
 
 st.set_page_config(page_title="Dashboard de Resultados", layout="wide")
 
+def colorear_semaforo(val):
+    if isinstance(val, str):
+        return ''
+    if val >= 0.80:
+        color = '#28a745' # Verde
+    elif val >= 0.50:
+        color = '#ffc107' # Amarillo/Naranja
+    else:
+        color = '#dc3545' # Rojo
+    return f'color: {color}; font-weight: bold;'
+
 # 1. Diccionarios de configuración
 estructura_cac = {
     "CIUDAD VICTORIA": ["2008604 TCC CIU100 MANTE4", "2008604 TCC CIU100 VICTORIA II4", "2008604 TCC CIU100 VICTORIA4"],
@@ -185,6 +196,17 @@ if archivo_a_procesar:
             resumen_cacs = df_filtrado.groupby('NOM_ESTRATEGIA').size().reset_index(name='Avance Mes')
             
             st.header("Resultados por CAC asociado al Area TMX")
+
+            ranking_areas = []
+            for area, cacs in estructura_cac.items():
+                st.subheader(area)
+
+            # (Esto requiere que sumes los totales globales antes, o puedes ponerlo al final)
+            col1, col2, col3 = st.columns(3)
+            col1.metric(label="Avance Total Mes", value=f"{total_global_avance}")
+            col2.metric(label="Meta Global", value=f"{total_global_meta}")
+            col3.metric(label="Cumplimiento Global", value=f"{(total_global_avance/total_global_meta):.0%}", delta="Objetivo: 100%")
+            st.divider()
             
             for area, cacs in estructura_cac.items():
                 st.subheader(area)
@@ -219,6 +241,12 @@ if archivo_a_procesar:
                     total_meta += meta
                     
                 total_porcentaje = (total_avance_mes / total_meta) if total_meta > 0 else 0
+                
+                ranking_areas.append({
+                    "Área": area,
+                    "Cumplimiento %": total_porcentaje * 100
+                })
+                
                 datos_area.insert(0, {
                     "Area/CAC": f"[-]{area} (TOTAL)",
                     "Avance Mes": total_avance_mes,
@@ -236,12 +264,19 @@ if archivo_a_procesar:
                 altura_tabla = (len(df_area) + 1) * 35 + 3
                 
                 st.dataframe(
-                    df_area.style.format({
-                        "Avance": "{:.0%}"
-                    }),
+                    df_area.style.format({"Avance": "{:.0%}"}).map(colorear_semaforo, subset=['Avance']),
                     use_container_width=True,
                     hide_index=True,
-                    height=altura_tabla  # <-- AQUÍ AGREGAMOS LA ALTURA
+                    height=altura_tabla,
+                    column_config={
+                        "Avance": st.column_config.ProgressColumn(
+                            "Avance",
+                            help="Cumplimiento de la meta",
+                            format="%.2f", # Muestra decimales
+                            min_value=0,
+                            max_value=1,   # Asume que el porcentaje es base 1 (ej. 0.38)
+                        )
+                    }
                 )
                 st.markdown("---")
         else:
