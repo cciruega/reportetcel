@@ -194,7 +194,7 @@ if archivo_a_procesar:
                 total_asesores = 0
                 total_meta = 0
                 
-for cac in cacs:
+                for cac in cacs:
                     avance_fila = resumen_cacs[resumen_cacs['NOM_ESTRATEGIA'] == cac]
                     avance = avance_fila['Avance Mes'].values[0] if not avance_fila.empty else 0
                     
