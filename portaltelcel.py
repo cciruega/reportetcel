@@ -121,10 +121,6 @@ nombres_simples = {
     "2008604 TCC TAM122 TAMPICO IV4": "TAMPICO IV"
 }
 
-col_logo, col_titulo = st.columns([1, 6])
-with col_logo:
-    st.image("telmextelcellogo.png", width=90)
-with col_titulo:
     st.title("Telmex-Telcel")
 
 # Función para cargar el archivo sorteando las primeras filas vacías
