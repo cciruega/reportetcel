@@ -178,12 +178,19 @@ if archivo_a_procesar:
                     
                 df_area = pd.DataFrame(datos_area)
                 
+                # -----------------------------------------------------
+                # CÁLCULO DE ALTURA DINÁMICA
+                # (Número de filas + 1 del encabezado) * 35 píxeles
+                # -----------------------------------------------------
+                altura_tabla = (len(df_area) + 1) * 35 + 3
+                
                 st.dataframe(
                     df_area.style.format({
                         "Avance": "{:.0%}"
                     }),
                     use_container_width=True,
-                    hide_index=True
+                    hide_index=True,
+                    height=altura_tabla  # <-- AQUÍ AGREGAMOS LA ALTURA
                 )
                 st.markdown("---")
         else:
