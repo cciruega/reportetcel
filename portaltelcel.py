@@ -196,17 +196,8 @@ if archivo_a_procesar:
             resumen_cacs = df_filtrado.groupby('NOM_ESTRATEGIA').size().reset_index(name='Avance Mes')
             
             st.header("Resultados por CAC asociado al Area TMX")
-
-            ranking_areas = []
-            for area, cacs in estructura_cac.items():
-                st.subheader(area)
-
-            # (Esto requiere que sumes los totales globales antes, o puedes ponerlo al final)
-            col1, col2, col3 = st.columns(3)
-            col1.metric(label="Avance Total Mes", value=f"{total_global_avance}")
-            col2.metric(label="Meta Global", value=f"{total_global_meta}")
-            col3.metric(label="Cumplimiento Global", value=f"{(total_global_avance/total_global_meta):.0%}", delta="Objetivo: 100%")
-            st.divider()
+            
+            ranking_areas = [] # <--- LISTA INICIADA AQUÍ
             
             for area, cacs in estructura_cac.items():
                 st.subheader(area)
@@ -225,11 +216,10 @@ if archivo_a_procesar:
                     
                     porcentaje = (avance / meta) if meta > 0 else 0
                     
-                    # Buscamos el nombre limpio, si por alguna razón no existe, deja el nombre original
                     nombre_mostrar = nombres_simples.get(cac, cac)
                     
                     datos_area.append({
-                        "Area/CAC": nombre_mostrar, # <-- Aquí usamos el nombre limpio
+                        "Area/CAC": nombre_mostrar,
                         "Avance Mes": avance,
                         "Asesores": asesores,
                         "Meta": meta,
@@ -242,6 +232,7 @@ if archivo_a_procesar:
                     
                 total_porcentaje = (total_avance_mes / total_meta) if total_meta > 0 else 0
                 
+                # <--- GUARDADO EN LA LISTA AQUÍ
                 ranking_areas.append({
                     "Área": area,
                     "Cumplimiento %": total_porcentaje * 100
@@ -256,6 +247,22 @@ if archivo_a_procesar:
                 })
                     
                 df_area = pd.DataFrame(datos_area)
+                
+                altura_tabla = (len(df_area) + 1) * 35 + 3
+                st.dataframe(
+                    df_area.style.format({"Avance": "{:.0%}"}),
+                    use_container_width=True,
+                    hide_index=True,
+                    height=altura_tabla
+                )
+                st.markdown("---")
+            
+            # <--- GRÁFICA FUERA DEL CICLO (MISMA ALINEACIÓN QUE EL FOR)
+            st.divider()
+            st.subheader("📊 Ranking Global de Cumplimiento")
+            df_ranking = pd.DataFrame(ranking_areas)
+            df_ranking = df_ranking.sort_values(by="Cumplimiento %", ascending=False)
+            st.bar_chart(df_ranking.set_index("Área")["Cumplimiento %"])
                 
                 # -----------------------------------------------------
                 # CÁLCULO DE ALTURA DINÁMICA
