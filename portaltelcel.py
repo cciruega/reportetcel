@@ -80,7 +80,7 @@ st.title("Telmex-Telcel")
 
 # Función para cargar el archivo sorteando las primeras filas vacías
 def cargar_datos(archivo):
-    df_temp = pd.read_excel(archivo, sheet_name="Base", header=2)
+    df_temp = pd.read_excel(archivo, sheet_name="Detalle1", header=2)
     if 'NOM_ESTRATEGIA' in df_temp.columns:
         return df_temp
     else:
