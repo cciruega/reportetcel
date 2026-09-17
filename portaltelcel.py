@@ -121,7 +121,7 @@ nombres_simples = {
     "2008604 TCC TAM122 TAMPICO IV4": "TAMPICO IV"
 }
 
-    st.title("Telmex-Telcel")
+st.title("Telmex-Telcel")
 
 # Función para cargar el archivo sorteando las primeras filas vacías
 def cargar_datos(archivo):
