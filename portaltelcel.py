@@ -28,7 +28,7 @@ catalogo_asesores = {
     "2008604 TCC TAM121 TAMPICO I4": 34, "2008604 TCC TAM122 TAMPICO II4": 20, "2008604 TCC TAM122 TAMPICO III4": 23, "2008604 TCC TAM122 TAMPICO IV4": 23
 }
 
-st.title("Portal de Resultados Operativos")
+st.title("Resultados Telmex-Telcel")
 
 # Función para cargar el archivo sorteando las primeras filas vacías
 def cargar_datos(archivo):
