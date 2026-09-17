@@ -123,7 +123,7 @@ nombres_simples = {
 
 col_logo, col_titulo = st.columns([1, 6])
 with col_logo:
-    st.image("telmextelcel.png", width=90)
+    st.image("telmextelcellogo.png", width=90)
 with col_titulo:
     st.title("Telmex-Telcel")
 
