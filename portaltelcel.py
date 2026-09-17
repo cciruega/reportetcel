@@ -257,7 +257,7 @@ if archivo_a_procesar:
                 # Creación ÚNICA de la tabla con todos los formatos visuales (Semáforo y Barra)
                 st.dataframe(
                     df_area.style.format({"Avance": "{:.0%}"}).map(colorear_semaforo, subset=['Avance']),
-                    use_container_width=True,
+                    use_container_width=False,  # <--- CAMBIAR A False
                     hide_index=True,
                     height=altura_tabla,
                     column_config={
