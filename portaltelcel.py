@@ -95,7 +95,7 @@ def cargar_datos(archivo):
     if 'NOM_ESTRATEGIA' in df_temp.columns:
         return df_temp
     else:
-        return pd.read_excel(archivo, sheet_name="Base")
+        return pd.read_excel(archivo, sheet_name="Detalle1")
 
 # ---------------------------------------------------------
 # ☁️ LÓGICA DE DETECCIÓN AUTOMÁTICA (CLARO DRIVE)
