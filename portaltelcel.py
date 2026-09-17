@@ -7,6 +7,40 @@ import io
 
 st.set_page_config(page_title="Dashboard de Resultados", layout="wide")
 
+# ---------------------------------------------------------
+# 🎨 ESTILOS CORPORATIVOS (OCULTAR ICONOS DE STREAMLIT/GITHUB)
+# ---------------------------------------------------------
+ocultar_iconos = """
+<style>
+/* 1. Ocultar el encabezado completo (desaparece Fork, GitHub y Menú) */
+[data-testid="stHeader"] {
+    display: none !important;
+}
+
+/* 2. Ocultar barra de herramientas secundaria por seguridad */
+[data-testid="stToolbar"] {
+    display: none !important;
+}
+
+/* 3. Ocultar el menú de hamburguesa nativo */
+#MainMenu {
+    display: none !important;
+}
+
+/* 4. Ocultar pie de página (marca de agua de Streamlit) */
+footer {
+    display: none !important;
+}
+
+/* 5. Ocultar el espacio en blanco que deja el encabezado al desaparecer */
+.stApp > header {
+    background-color: transparent !important;
+}
+</style>
+"""
+st.markdown(ocultar_iconos, unsafe_allow_html=True)
+# ---------------------------------------------------------
+
 def colorear_semaforo(val):
     if isinstance(val, str):
         return ''
