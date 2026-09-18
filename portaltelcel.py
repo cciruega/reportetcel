@@ -8,7 +8,7 @@ import streamlit as st
 
 st.set_page_config(
     page_title="Dashboard de Resultados",
-    page_icon="reportetcel/telcel2.ico",  # Puede ser una ruta local o una URL
+    page_icon="telcel2.ico",  # Puede ser una ruta local o una URL
     layout="wide",
 )
 
