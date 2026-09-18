@@ -126,7 +126,15 @@ nombres_simples = {
     "2008604 TCC TAM122 TAMPICO IV4": "TAMPICO IV"
 }
 
-st.title("Telmex-Telcel")
+col1, col2 = st.columns([0.1, 0.9])
+
+with col1:
+    # Carga tu archivo local. El parámetro width controla el tamaño (ajústalo si es necesario)
+    st.image("telcel2.ico", width=75)
+
+with col2:
+    # Tu título principal alineado a la derecha del logo
+    st.title("Telmex-Telcel")
 
 # Función para cargar el archivo sorteando las primeras filas vacías
 def cargar_datos(archivo):
