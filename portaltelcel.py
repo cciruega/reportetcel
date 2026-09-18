@@ -135,7 +135,7 @@ with col_centro:
     st.title("Telmex-Telcel")
 
 with col_der:
-    st.image("telcel2.ico", width=65) 
+    st.image("telcel2.ico", width=55) 
 
 # Función para cargar el archivo sorteando las primeras filas vacías
 def cargar_datos(archivo):
