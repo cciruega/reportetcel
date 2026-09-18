@@ -126,7 +126,7 @@ nombres_simples = {
     "2008604 TCC TAM122 TAMPICO IV4": "TAMPICO IV"
 }
 
-col1, col2 = st.columns([0.1, 0.9])
+col1, col2 = st.columns([0.1, 0.9], vertical_alignment="center")
 
 with col1:
     # Carga tu archivo local. El parámetro width controla el tamaño (ajústalo si es necesario)
