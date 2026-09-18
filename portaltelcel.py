@@ -4,8 +4,13 @@ import datetime
 import requests
 import zipfile
 import io
+import streamlit as st
 
-st.set_page_config(page_title="Dashboard de Resultados", layout="wide")
+st.set_page_config(
+    page_title="Dashboard de Resultados",
+    page_icon="reportetcel/telcel2.ico",  # Puede ser una ruta local o una URL
+    layout="wide",
+)
 
 # ---------------------------------------------------------
 # 🎨 ESTILOS CORPORATIVOS (OCULTAR ICONOS DE STREAMLIT/GITHUB)
