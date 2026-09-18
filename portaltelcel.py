@@ -126,15 +126,16 @@ nombres_simples = {
     "2008604 TCC TAM122 TAMPICO IV4": "TAMPICO IV"
 }
 
-col1, col2 = st.columns([0.1, 0.9], vertical_alignment="center")
+col_izq, col_centro, col_der = st.columns([0.1, 0.8, 0.1], vertical_alignment="center")
 
-with col1:
-    # Carga tu archivo local. El parámetro width controla el tamaño (ajústalo si es necesario)
+with col_izq:
     st.image("Telmex2.png", width=75)
 
-with col2:
-    # Tu título principal alineado a la derecha del logo
+with col_centro:
     st.title("Telmex-Telcel")
+
+with col_der:
+    st.image("telcel2.ico", width=65) 
 
 # Función para cargar el archivo sorteando las primeras filas vacías
 def cargar_datos(archivo):
