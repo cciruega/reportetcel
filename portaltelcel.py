@@ -130,7 +130,7 @@ col1, col2 = st.columns([0.1, 0.9])
 
 with col1:
     # Carga tu archivo local. El parámetro width controla el tamaño (ajústalo si es necesario)
-    st.image("telcel2.ico", width=75)
+    st.image("Telmex2.png", width=75)
 
 with col2:
     # Tu título principal alineado a la derecha del logo
