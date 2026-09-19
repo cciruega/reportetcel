@@ -8,7 +8,7 @@ import streamlit as st
 
 st.set_page_config(
     page_title="Dashboard de Resultados",
-    page_icon="telcel2.ico",  # Puede ser una ruta local o una URL
+    page_icon="reportetcel/telcel2.ico",  # Puede ser una ruta local o una URL
     layout="wide",
 )
 
@@ -126,40 +126,7 @@ nombres_simples = {
     "2008604 TCC TAM122 TAMPICO IV4": "TAMPICO IV"
 }
 
-c1, c2, c3, c4, c5 = st.columns([2, 1, 1, 1, 2], vertical_alignment="center")
-
-with c2:
-    st.image("Telmex2.png", use_container_width=True) 
-    
-with c4:
-    st.image("telcel2.ico", use_container_width=True)
-
-st.markdown(
-    """
-    <div style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 15px; width: 100%;">
-        
-        <!-- Logo Izquierdo (Telmex) con Fondo Blanco -->
-        <div style="background-color: white; padding: 6px 10px; border-radius: 6px; display: flex; align-items: center; box-shadow: 0px 1px 3px rgba(0,0,0,0.15);">
-            <img src="https://githubusercontent.com" style="height: 35px; width: auto; object-fit: contain;">
-        </div>
-        
-        <!-- Título Principal -->
-        <h1 style="margin: 0; padding: 0; font-family: sans-serif; color: #1E293B; font-size: 38px; line-height: 38px; font-weight: bold; white-space: nowrap;">
-            Telmex-Telcel
-        </h1>
-        
-        <!-- Logo Derecho (Telcel) con Fondo Blanco -->
-        <div style="background-color: white; padding: 6px 10px; border-radius: 6px; display: flex; align-items: center; box-shadow: 0px 1px 3px rgba(0,0,0,0.15);">
-            <img src="https://githubusercontent.com" style="height: 35px; width: auto; object-fit: contain;">
-        </div>
-        
-    </div>
-    <hr style="margin-top: 5px; margin-bottom: 25px; border: 0; border-top: 1px solid #E2E8F0;">
-    """,
-    unsafe_allow_html=True
-)
-
-st.markdown("---")
+st.title("Telmex-Telcel")
 
 # Función para cargar el archivo sorteando las primeras filas vacías
 def cargar_datos(archivo):
