@@ -126,14 +126,20 @@ nombres_simples = {
     "2008604 TCC TAM122 TAMPICO IV4": "TAMPICO IV"
 }
 
-col_izq, col_centro, col_der = st.columns([0.1, 0.8, 0.1], vertical_alignment="center")
+c1, c2, c3, c4, c5 = st.columns([2, 1, 1, 1, 2], vertical_alignment="center")
 
-with col_izq:
-    st.image("Telmex2.png", width=75)
-    st.image("telcel2.ico", width=75) 
+with c2:
+    st.image("Telmex2.png", use_container_width=True) 
+    
+with c4:
+    st.image("telcel2.ico", use_container_width=True)
 
-with col_centro:
-    st.title("Telmex-Telcel")
+st.markdown(
+    "<h1 style='text-align: center; color: #1E293B;'>Telmex-Telcel</h1>", 
+    unsafe_allow_html=True
+    )
+
+st.markdown("---")
 
 # Función para cargar el archivo sorteando las primeras filas vacías
 def cargar_datos(archivo):
