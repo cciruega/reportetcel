@@ -126,7 +126,7 @@ nombres_simples = {
     "2008604 TCC TAM122 TAMPICO IV4": "TAMPICO IV"
 }
 
-st.title("Telmex-Telcel")
+st.markdown("<h1 style='text-align: center;'>Telmex-Telcel</h1>", unsafe_allow_html=True)
 
 # Función para cargar el archivo sorteando las primeras filas vacías
 def cargar_datos(archivo):
