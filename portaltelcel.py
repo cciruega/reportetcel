@@ -6,12 +6,10 @@ import zipfile
 import io
 import streamlit as st
 
-import streamlit as st
-
 st.set_page_config(
-    page_title="Telmex-Telcel",
-    page_icon="telcel2.ico",
-    layout="wide"
+    page_title="Dashboard de Resultados",
+    page_icon="telcel2.ico",  # Puede ser una ruta local o una URL
+    layout="wide",
 )
 
 # ---------------------------------------------------------
@@ -45,30 +43,7 @@ footer {
 }
 </style>
 """
-st.markdown(
-    """
-    <div style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 15px; width: 100%;">
-        
-        <!-- Logo Izquierdo (Telmex) con Fondo Blanco -->
-        <div style="background-color: white; padding: 6px 10px; border-radius: 6px; display: flex; align-items: center; box-shadow: 0px 1px 3px rgba(0,0,0,0.15);">
-            <img src="https://githubusercontent.com" style="height: 35px; width: auto; object-fit: contain;">
-        </div>
-        
-        <!-- Título Principal -->
-        <h1 style="margin: 0; padding: 0; font-family: sans-serif; color: #1E293B; font-size: 38px; line-height: 38px; font-weight: bold; white-space: nowrap;">
-            Telmex-Telcel
-        </h1>
-        
-        <!-- Logo Derecho (Telcel) con Fondo Blanco -->
-        <div style="background-color: white; padding: 6px 10px; border-radius: 6px; display: flex; align-items: center; box-shadow: 0px 1px 3px rgba(0,0,0,0.15);">
-            <img src="https://githubusercontent.com" style="height: 35px; width: auto; object-fit: contain;">
-        </div>
-        
-    </div>
-    <hr style="margin-top: 5px; margin-bottom: 25px; border: 0; border-top: 1px solid #E2E8F0;">
-    """,
-    unsafe_allow_html=True
-)
+st.markdown(ocultar_iconos, unsafe_allow_html=True)
 # ---------------------------------------------------------
 
 def colorear_semaforo(val):
