@@ -130,10 +130,10 @@ col_izq, col_centro, col_der = st.columns([0.1, 0.8, 0.1], vertical_alignment="c
 
 with col_izq:
     st.image("Telmex2.png", width=75)
+    st.image("telcel2.ico", width=75) 
 
 with col_centro:
     st.title("Telmex-Telcel")
-    st.image("telcel2.ico", width=55) 
 
 # Función para cargar el archivo sorteando las primeras filas vacías
 def cargar_datos(archivo):
