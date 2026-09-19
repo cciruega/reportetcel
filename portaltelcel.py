@@ -129,7 +129,6 @@ nombres_simples = {
 st.markdown("<h1 style='text-align: center;'>Telmex-Telcel</h1>", unsafe_allow_html=True)
 
 st.markdown("---")
-
 # Función para cargar el archivo sorteando las primeras filas vacías
 def cargar_datos(archivo):
     df_temp = pd.read_excel(archivo, sheet_name="Detalle1", header=2)
