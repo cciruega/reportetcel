@@ -6,10 +6,37 @@ import zipfile
 import io
 import streamlit as st
 
+import streamlit as st
+
 st.set_page_config(
-    page_title="Dashboard de Resultados",
-    page_icon="telcel2.ico",  # Puede ser una ruta local o una URL
-    layout="wide",
+    page_title="Telmex-Telcel",
+    page_icon="telcel2.ico",
+    layout="wide"
+)
+
+# --- CONFIGURACIÓN DE TÍTULO Y LOGOS CENTRADOS CON FONDO BLANCO ---
+# Usamos un solo bloque st.markdown para unificar los logos y el título en la misma línea
+st.markdown(
+    """
+    <div style="display: flex; justify-content: center; align-items: center; gap: 18px; margin-bottom: 10px;">
+        <!-- Logo Izquierdo (Telmex) -->
+        <div style="background-color: white; padding: 4px 8px; border-radius: 6px; display: flex; align-items: center; box-shadow: 0px 1px 3px rgba(0,0,0,0.1);">
+            <img src="app/static/Telmex2.png" style="height: 38px; width: auto; object-fit: contain;">
+        </div>
+        
+        <!-- Título Principal -->
+        <h1 style="margin: 0; padding: 0; font-family: sans-serif; color: #1E293B; font-size: 42px; line-height: 42px; font-weight: bold;">
+            Telmex-Telcel
+        </h1>
+        
+        <!-- Logo Derecho (Telcel) -->
+        <div style="background-color: white; padding: 4px 8px; border-radius: 6px; display: flex; align-items: center; box-shadow: 0px 1px 3px rgba(0,0,0,0.1);">
+            <img src="app/static/telcel2.ico" style="height: 38px; width: auto; object-fit: contain;">
+        </div>
+    </div>
+    <hr style="margin-top: 5px; margin-bottom: 20px; border: 0; border-top: 1px solid #E2E8F0;">
+    """,
+    unsafe_allow_html=True
 )
 
 # ---------------------------------------------------------
