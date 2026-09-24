@@ -6,6 +6,14 @@ import zipfile
 import io
 import streamlit as st
 
+@st.cache_data
+def convertir_df_a_excel(df):
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Resultados')
+    processed_data = output.getvalue()
+    return processed_data
+
 st.set_page_config(
     page_title="Dashboard de Resultados",
     page_icon="reportetcel/telcel2.ico",  # Puede ser una ruta local o una URL
@@ -310,6 +318,21 @@ if archivo_a_procesar:
                         )
                     }
                 )
+                
+                # --- NUEVO: BOTÓN DE DESCARGA ---
+                # Formateamos el DataFrame antes de descargarlo para que los porcentajes se vean bien en Excel
+                df_descarga = df_area.copy()
+                df_descarga['Avance'] = df_descarga['Avance'].apply(lambda x: f"{x:.0%}")
+                
+                excel_data = convertir_df_a_excel(df_descarga)
+                st.download_button(
+                    label=f"📥 Descargar tabla de {area} (Excel)",
+                    data=excel_data,
+                    file_name=f"Resultados_{area}.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    key=f"btn_descarga_{area}" # Es vital ponerle una key única a cada botón
+                )
+                
                 st.markdown("---")
             
             # <--- GRÁFICA FUERA DEL CICLO (MISMA ALINEACIÓN QUE EL FOR)
