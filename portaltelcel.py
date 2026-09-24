@@ -65,27 +65,41 @@ def colorear_semaforo(val):
     return f'color: {color}; font-weight: bold;'
 
 def generar_boton_descarga(df, nombre_archivo, btn_key):
-    # Crear una copia para exportar y asegurar que los porcentajes se vean bien
-    df_export = df.copy()
-    
-    # Formatear la columna 'Avance' de decimal (0.38) a porcentaje (38%)
-    df_export['Avance'] = pd.to_numeric(df_export['Avance'], errors='coerce').fillna(0)
-    df_export['Avance'] = df_export['Avance'].apply(lambda x: f"{x:.0%}")
+    try:
+        # 1. Copiamos los datos para exportar
+        df_export = df.copy()
         
-    # Convertir a Excel en memoria
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        df_export.to_excel(writer, index=False, sheet_name='Resultados')
-    excel_data = output.getvalue()
-    
-    # Imprimir el botón de descarga
-    st.download_button(
-        label=f"📥 Descargar {nombre_archivo}.xlsx",
-        data=excel_data,
-        file_name=f"{nombre_archivo}.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        key=btn_key
-    )
+        # 2. Formateo SEGURO: Solo lo hace si la columna 'Avance' existe en los datos
+        if 'Avance' in df_export.columns:
+            df_export['Avance'] = pd.to_numeric(df_export['Avance'], errors='coerce').fillna(0)
+            df_export['Avance'] = df_export['Avance'].apply(lambda x: f"{x:.0%}")
+            
+        # 3. Intento de creación de Excel
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df_export.to_excel(writer, index=False, sheet_name='Resultados')
+        excel_data = output.getvalue()
+        
+        # 4. Mostrar el botón de Excel
+        st.download_button(
+            label=f"📥 Descargar {nombre_archivo}.xlsx",
+            data=excel_data,
+            file_name=f"{nombre_archivo}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            key=btn_key
+        )
+        
+    except Exception as e:
+        # PLAN B INFALIBLE: Si algo falla, generamos un CSV nativo
+        csv_data = df_export.to_csv(index=False).encode('utf-8')
+        
+        st.download_button(
+            label=f"📥 Descargar {nombre_archivo} (CSV)",
+            data=csv_data,
+            file_name=f"{nombre_archivo}.csv",
+            mime="text/csv",
+            key=f"{btn_key}_csv"
+        )
 # 1. Diccionarios de configuración
 estructura_cac = {
     "CIUDAD VICTORIA": ["2008604 TCC CIU100 MANTE4", "2008604 TCC CIU100 VICTORIA II4", "2008604 TCC CIU100 VICTORIA4"],
