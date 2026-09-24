@@ -317,7 +317,7 @@ if archivo_a_procesar:
                     
                 df_area = pd.DataFrame(datos_area)
                 
-# -----------------------------------------------------
+                # -----------------------------------------------------
                 # CÁLCULO DE ALTURA DINÁMICA
                 # -----------------------------------------------------
                 altura_tabla = (len(df_area) + 1) * 35 + 3
@@ -339,11 +339,15 @@ if archivo_a_procesar:
                     }
                 )
                 
-                # Llamada limpia a la función del botón (Estilo Tablero Bolsas)
+                # --- NUEVO: FILTRAR EL DETALLE PARA LA DESCARGA ---
+                # Recortamos la base original para obtener solo los folios de los CACs de esta área
+                df_detalle_area = df_filtrado[df_filtrado['NOM_ESTRATEGIA'].isin(cacs)]
+                
+                # Llamada a la función del botón (pasando el DETALLE en lugar del resumen)
                 area_limpia = area.replace(" ", "_")
                 generar_boton_descarga(
-                    df_area, 
-                    nombre_archivo=f"Resultados_{area_limpia}", 
+                    df_detalle_area,  # <--- AQUÍ MANDAMOS LOS DATOS CRUDOS
+                    nombre_archivo=f"Detalle_{area_limpia}", # Cambiamos el nombre del archivo para que diga "Detalle"
                     btn_key=f"btn_descarga_{area_limpia}"
                 )
                 
