@@ -319,18 +319,23 @@ if archivo_a_procesar:
                 )
                 
                 # --- NUEVO: BOTÓN DE DESCARGA ---
-                # Formateamos el DataFrame antes de descargarlo para que los porcentajes se vean bien en Excel
-                df_descarga = df_area.copy()
-                df_descarga['Avance'] = df_descarga['Avance'].apply(lambda x: f"{x:.0%}")
-                
-                excel_data = convertir_df_a_excel(df_descarga)
-                st.download_button(
-                    label=f"📥 Descargar tabla de {area} (Excel)",
-                    data=excel_data,
-                    file_name=f"Resultados_{area}.xlsx",
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    key=f"btn_descarga_{area}" # Es vital ponerle una key única a cada botón
-                )
+                try:
+                    df_descarga = df_area.copy()
+                    # Convertir a numérico por seguridad antes de formatear
+                    df_descarga['Avance'] = pd.to_numeric(df_descarga['Avance'], errors='coerce').fillna(0)
+                    df_descarga['Avance'] = df_descarga['Avance'].apply(lambda x: f"{x:.0%}")
+                    
+                    excel_data = convertir_df_a_excel(df_descarga)
+                    
+                    st.download_button(
+                        label=f"📥 Descargar tabla de {area} (Excel)",
+                        data=excel_data,
+                        file_name=f"Resultados_{area.replace(' ', '_')}.xlsx", # Nombres sin espacios
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        key=f"btn_descarga_{area.replace(' ', '_')}" # Key sin espacios para mayor seguridad
+                    )
+                except Exception as e:
+                    st.warning(f"No se pudo generar el Excel para {area}. Detalle: {e}")
                 
                 st.markdown("---")
             
