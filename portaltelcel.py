@@ -323,10 +323,10 @@ if archivo_a_procesar:
                 # -----------------------------------------------------
                 altura_tabla = (len(df_area) + 1) * 35 + 3
                 
-                # Creación ÚNICA de la tabla con todos los formatos visuales (Semáforo y Barra)
+                # Creación ÚNICA de la tabla con todos los formatos visuales
                 st.dataframe(
                     df_area.style.format({"Avance": "{:.0%}"}).map(colorear_semaforo, subset=['Avance']),
-                    width="content",  # <--- ASEGÚRATE DE QUE DIGA "content" ENTRE COMILLAS
+                    width="content",  
                     hide_index=True,
                     height=altura_tabla,
                     column_config={
@@ -339,9 +339,9 @@ if archivo_a_procesar:
                         )
                     }
                 )
-
-                area_limpia = area.replace(" ", "_")
                 
+                # Llamada limpia a la función del botón (Estilo Tablero Bolsas)
+                area_limpia = area.replace(" ", "_")
                 generar_boton_descarga(
                     df_area, 
                     nombre_archivo=f"Resultados_{area_limpia}", 
