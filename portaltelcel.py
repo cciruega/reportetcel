@@ -65,11 +65,12 @@ def colorear_semaforo(val):
     return f'color: {color}; font-weight: bold;'
 
 def generar_boton_descarga(df, nombre_archivo, btn_key):
-    # Formatear el Avance como porcentaje para el Excel
+    # Crear una copia para exportar y asegurar que los porcentajes se vean bien
     df_export = df.copy()
-    if 'Avance' in df_export.columns:
-        df_export['Avance'] = pd.to_numeric(df_export['Avance'], errors='coerce').fillna(0)
-        df_export['Avance'] = df_export['Avance'].apply(lambda x: f"{x:.0%}")
+    
+    # Formatear la columna 'Avance' de decimal (0.38) a porcentaje (38%)
+    df_export['Avance'] = pd.to_numeric(df_export['Avance'], errors='coerce').fillna(0)
+    df_export['Avance'] = df_export['Avance'].apply(lambda x: f"{x:.0%}")
         
     # Convertir a Excel en memoria
     output = io.BytesIO()
@@ -85,7 +86,6 @@ def generar_boton_descarga(df, nombre_archivo, btn_key):
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         key=btn_key
     )
-
 # 1. Diccionarios de configuración
 estructura_cac = {
     "CIUDAD VICTORIA": ["2008604 TCC CIU100 MANTE4", "2008604 TCC CIU100 VICTORIA II4", "2008604 TCC CIU100 VICTORIA4"],
