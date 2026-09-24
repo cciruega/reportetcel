@@ -64,6 +64,28 @@ def colorear_semaforo(val):
         color = '#dc3545' # Rojo
     return f'color: {color}; font-weight: bold;'
 
+def generar_boton_descarga(df, nombre_archivo, btn_key):
+    # Formatear el Avance como porcentaje para el Excel
+    df_export = df.copy()
+    if 'Avance' in df_export.columns:
+        df_export['Avance'] = pd.to_numeric(df_export['Avance'], errors='coerce').fillna(0)
+        df_export['Avance'] = df_export['Avance'].apply(lambda x: f"{x:.0%}")
+        
+    # Convertir a Excel en memoria
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df_export.to_excel(writer, index=False, sheet_name='Resultados')
+    excel_data = output.getvalue()
+    
+    # Imprimir el botón de descarga
+    st.download_button(
+        label=f"📥 Descargar {nombre_archivo}.xlsx",
+        data=excel_data,
+        file_name=f"{nombre_archivo}.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        key=btn_key
+    )
+
 # 1. Diccionarios de configuración
 estructura_cac = {
     "CIUDAD VICTORIA": ["2008604 TCC CIU100 MANTE4", "2008604 TCC CIU100 VICTORIA II4", "2008604 TCC CIU100 VICTORIA4"],
@@ -317,25 +339,14 @@ if archivo_a_procesar:
                         )
                     }
                 )
+
+                area_limpia = area.replace(" ", "_")
                 
-                # --- NUEVO: BOTÓN DE DESCARGA ---
-                try:
-                    df_descarga = df_area.copy()
-                    # Convertir a numérico por seguridad antes de formatear
-                    df_descarga['Avance'] = pd.to_numeric(df_descarga['Avance'], errors='coerce').fillna(0)
-                    df_descarga['Avance'] = df_descarga['Avance'].apply(lambda x: f"{x:.0%}")
-                    
-                    excel_data = convertir_df_a_excel(df_descarga)
-                    
-                    st.download_button(
-                        label=f"📥 Descargar tabla de {area} (Excel)",
-                        data=excel_data,
-                        file_name=f"Resultados_{area.replace(' ', '_')}.xlsx", # Nombres sin espacios
-                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        key=f"btn_descarga_{area.replace(' ', '_')}" # Key sin espacios para mayor seguridad
-                    )
-                except Exception as e:
-                    st.warning(f"No se pudo generar el Excel para {area}. Detalle: {e}")
+                generar_boton_descarga(
+                    df_area, 
+                    nombre_archivo=f"Resultados_{area_limpia}", 
+                    btn_key=f"btn_descarga_{area_limpia}"
+                )
                 
                 st.markdown("---")
             
