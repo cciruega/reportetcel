@@ -6,7 +6,6 @@ import zipfile
 import io
 import streamlit as st
 
-@st.cache_data
 def convertir_df_a_excel(df):
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
