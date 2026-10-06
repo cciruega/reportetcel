@@ -299,8 +299,8 @@ if archivo_a_procesar:
             # Si elige un área específica, solo mostramos esa
             estructura_cac_filtrada = {area_seleccionada: estructura_cac[area_seleccionada]}
     
-        # --- NUEVO: 3 y 4. FILTROS DE FECHA_CAPTURA (AÑO Y MES) ---
-        if 'FECHA_CAPTURA' in df.columns:
+# --- NUEVO: 3 y 4. FILTROS DE FECHA_CAPTURA (AÑO Y MES) ---
+if 'FECHA_CAPTURA' in df.columns:
 
     # Convertimos la columna a fecha
     df['FECHA_CAPTURA'] = pd.to_datetime(
