@@ -633,7 +633,7 @@ if archivo_a_procesar:
                         "Avance Mes": avance,
                         "Asesores": asesores,
                         "Meta": meta,
-                        "Avance": porcentaje
+                        "Avance": porcentaje,
                         "Instaladas": instaladas,
                         "Efect.": efectividad
                     })
