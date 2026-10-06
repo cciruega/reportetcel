@@ -22,6 +22,18 @@ st.set_page_config(
 # 🎨 ESTILOS CORPORATIVOS
 # HEADER COMPLETO + SIDEBAR FUNCIONAL
 # ---------------------------------------------------------
+/* ========================================================= 
+    HEADER SUPERIOR 
+    ========================================================= */
+[data-testid="stHeader"] { 
+    display: flex !important; 
+    visibility: visible !important; 
+    opacity: 1 !important; 
+    width: 100% !important; 
+    min-height: 2.5rem !important; 
+    background: transparent !important; 
+    z-index: 999999 !important; 
+}
 
 /* =========================================================
    BOTÓN PARA ABRIR/CERRAR SIDEBAR
@@ -39,13 +51,6 @@ st.set_page_config(
    Ocultamos las opciones secundarias
    ========================================================= */
 [data-testid="stToolbar"] {
-    display: none !important;
-}
-
-/* =========================================================
-   MENÚ PRINCIPAL ANTIGUO
-   ========================================================= */
-#MainMenu {
     display: none !important;
 }
 
