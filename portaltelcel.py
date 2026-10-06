@@ -703,8 +703,8 @@ if archivo_a_procesar:
                             help="Cumplimiento de la meta",
                             format="%.2f",
                             min_value=0,
-                            max_value=1,
-                        )
+                            max_value=1
+                        ),
                         "Efect.": st.column_config.ProgressColumn(
                             "Efect.",
                             help="Efectividad (Instaladas / Avance Mes)",
