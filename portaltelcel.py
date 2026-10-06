@@ -26,20 +26,6 @@ ocultar_iconos = """
 <style>
 
 /* =========================================================
-   HEADER SUPERIOR
-   Mantener la línea completa visible
-   ========================================================= */
-[data-testid="stHeader"] {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    width: 100% !important;
-    height: 2.5rem !important;
-    background: transparent !important;
-    z-index: 999999 !important;
-}
-
-/* =========================================================
    BOTÓN PARA ABRIR/CERRAR SIDEBAR
    ========================================================= */
 [data-testid="stSidebarCollapsedControl"] {
