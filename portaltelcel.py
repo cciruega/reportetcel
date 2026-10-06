@@ -270,7 +270,7 @@ if archivo_a_procesar:
         # ---------------------------------------------------------
         estado_seleccionado = st.sidebar.multiselect(
             "Selecciona Estado:",
-            options=list(mapa_estados.keys())
+            options=mapa_estados.keys()
         )
 
         # ---------------------------------------------------------
