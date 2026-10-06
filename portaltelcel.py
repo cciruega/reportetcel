@@ -30,7 +30,7 @@ st.set_page_config(
     visibility: visible !important; 
     opacity: 1 !important; 
     width: 100% !important; 
-    min-height: 2.5rem !important; 
+    min-height: 3rem !important; 
     background: transparent !important; 
     z-index: 999999 !important; 
 }
