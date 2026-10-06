@@ -266,41 +266,87 @@ if archivo_a_procesar:
         st.sidebar.header("Filtros Principales")
 
         # ---------------------------------------------------------
-        # 1. FILTRO DE ESTADO
+        # 1. FILTRO DE ESTADO - SELECCIÓN MÚLTIPLE
         # ---------------------------------------------------------
-        estado_seleccionado = st.sidebar.selectbox(
+
+        estados_disponibles = list(mapa_estados.keys())
+        
+        estados_seleccionados = st.sidebar.multiselect(
             "Selecciona Estado:",
-            options=list(mapa_estados.keys())
+            options=estados_disponibles,
+            default=estados_disponibles,
+            help="Puedes seleccionar uno o varios estados."
         )
-
+        
         # ---------------------------------------------------------
-        # 2. FILTRO DE ÁREA
+        # VALIDAR ESTADO
         # ---------------------------------------------------------
-        areas_disponibles = mapa_estados[estado_seleccionado]
-
-        opciones_area = ["TODAS"] + areas_disponibles
-
-        area_seleccionada = st.sidebar.selectbox(
+        
+        if not estados_seleccionados:
+        
+            st.sidebar.warning(
+                "Selecciona al menos un Estado."
+            )
+        
+            st.stop()
+        
+        
+        # ---------------------------------------------------------
+        # 2. OBTENER ÁREAS DE LOS ESTADOS SELECCIONADOS
+        # ---------------------------------------------------------
+        
+        areas_disponibles = []
+        
+        for estado in estados_seleccionados:
+        
+            areas_disponibles.extend(
+                mapa_estados.get(estado, [])
+            )
+        
+        
+        # ---------------------------------------------------------
+        # ELIMINAR POSIBLES DUPLICADOS
+        # ---------------------------------------------------------
+        
+        areas_disponibles = list(
+            dict.fromkeys(areas_disponibles)
+        )
+        
+        
+        # ---------------------------------------------------------
+        # 3. FILTRO DE ÁREA - SELECCIÓN MÚLTIPLE
+        # ---------------------------------------------------------
+        
+        area_seleccionada = st.sidebar.multiselect(
             "Selecciona Área:",
-            options=opciones_area
+            options=areas_disponibles,
+            default=areas_disponibles,
+            help="Puedes seleccionar una o varias áreas."
         )
-
+        
+        
         # ---------------------------------------------------------
-        # FILTRAR ESTRUCTURA CAC
+        # VALIDAR ÁREA
         # ---------------------------------------------------------
-        if area_seleccionada == "TODAS":
-
-            estructura_cac_filtrada = {
-                k: v
-                for k, v in estructura_cac.items()
-                if k in areas_disponibles
-            }
-
-        else:
-
-            estructura_cac_filtrada = {
-                area_seleccionada: estructura_cac[area_seleccionada]
-            }
+        
+        if not area_seleccionada:
+        
+            st.sidebar.warning(
+                "Selecciona al menos un Área."
+            )
+        
+            st.stop()
+        
+        
+        # ---------------------------------------------------------
+        # 4. FILTRAR ESTRUCTURA CAC
+        # ---------------------------------------------------------
+        
+        estructura_cac_filtrada = {
+            k: v
+            for k, v in estructura_cac.items()
+            if k in area_seleccionada
+        }
 
         # =========================================================
         # 3. FILTRO DE FECHA_CAPTURA
