@@ -18,65 +18,72 @@ st.set_page_config(
     layout="wide",
 )
 
+```python
 # ---------------------------------------------------------
 # 🎨 ESTILOS CORPORATIVOS
 # HEADER COMPLETO + SIDEBAR FUNCIONAL
 # ---------------------------------------------------------
-/* ========================================================= 
-    HEADER SUPERIOR 
-    ========================================================= */
-[data-testid="stHeader"] { 
-    display: flex !important; 
-    visibility: visible !important; 
-    opacity: 1 !important; 
-    width: 100% !important; 
-    min-height: 3rem !important; 
-    background: transparent !important; 
-    z-index: 999999 !important; 
+
+st.markdown("""
+<style>
+
+/* =========================================================
+   HEADER SUPERIOR
+   ========================================================= */
+[data-testid="stHeader"] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    min-height: 2.5rem !important;
+    background: transparent !important;
+    z-index: 999999 !important;
 }
 
 /* =========================================================
-   BOTÓN PARA ABRIR/CERRAR SIDEBAR
+   BOTÓN PARA ABRIR / CERRAR SIDEBAR
    ========================================================= */
 [data-testid="stSidebarCollapsedControl"] {
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
-    position: relative !important;
     z-index: 1000000 !important;
 }
 
 /* =========================================================
-   BARRA DE HERRAMIENTAS
-   Ocultamos las opciones secundarias
+   SIDEBAR
+   ========================================================= */
+[data-testid="stSidebar"] {
+    z-index: 999998 !important;
+}
+
+/* =========================================================
+   OCULTAR BARRA DE HERRAMIENTAS
    ========================================================= */
 [data-testid="stToolbar"] {
     display: none !important;
 }
 
 /* =========================================================
-   FOOTER
+   OCULTAR FOOTER
    ========================================================= */
 footer {
     display: none !important;
 }
 
 /* =========================================================
-   NO OCULTAR EL HEADER NI REDUCIRLO A CERO
+   MANTENER HEADER VISIBLE
    ========================================================= */
 .stApp > header {
     display: flex !important;
-    background: transparent !important;
+    background-color: transparent !important;
 }
 
 </style>
-"""
+""", unsafe_allow_html=True)
 
-st.markdown(
-    ocultar_iconos,
-    unsafe_allow_html=True
-)
 # ---------------------------------------------------------
+```
 
 def colorear_semaforo(val):
     if isinstance(val, str):
