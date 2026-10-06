@@ -19,37 +19,74 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# 🎨 ESTILOS CORPORATIVOS (OCULTAR ICONOS DE STREAMLIT/GITHUB)
+# 🎨 ESTILOS CORPORATIVOS
+# HEADER COMPLETO + SIDEBAR FUNCIONAL
 # ---------------------------------------------------------
 ocultar_iconos = """
 <style>
-/* 1. Ocultar el encabezado completo (desaparece Fork, GitHub y Menú) */
+
+/* =========================================================
+   HEADER SUPERIOR
+   Mantener la línea completa visible
+   ========================================================= */
 [data-testid="stHeader"] {
-    display: none !important;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    height: 2.5rem !important;
+    background: transparent !important;
+    z-index: 999999 !important;
 }
 
-/* 2. Ocultar barra de herramientas secundaria por seguridad */
+/* =========================================================
+   BOTÓN PARA ABRIR/CERRAR SIDEBAR
+   ========================================================= */
+[data-testid="stSidebarCollapsedControl"] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 1000000 !important;
+}
+
+/* =========================================================
+   BARRA DE HERRAMIENTAS
+   Ocultamos las opciones secundarias
+   ========================================================= */
 [data-testid="stToolbar"] {
     display: none !important;
 }
 
-/* 3. Ocultar el menú de hamburguesa nativo */
+/* =========================================================
+   MENÚ PRINCIPAL ANTIGUO
+   ========================================================= */
 #MainMenu {
     display: none !important;
 }
 
-/* 4. Ocultar pie de página (marca de agua de Streamlit) */
+/* =========================================================
+   FOOTER
+   ========================================================= */
 footer {
     display: none !important;
 }
 
-/* 5. Ocultar el espacio en blanco que deja el encabezado al desaparecer */
+/* =========================================================
+   NO OCULTAR EL HEADER NI REDUCIRLO A CERO
+   ========================================================= */
 .stApp > header {
-    background-color: transparent !important;
+    display: flex !important;
+    background: transparent !important;
 }
+
 </style>
 """
-st.markdown(ocultar_iconos, unsafe_allow_html=True)
+
+st.markdown(
+    ocultar_iconos,
+    unsafe_allow_html=True
+)
 # ---------------------------------------------------------
 
 def colorear_semaforo(val):
