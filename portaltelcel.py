@@ -82,7 +82,6 @@ footer {
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-```
 
 def colorear_semaforo(val):
     if isinstance(val, str):
