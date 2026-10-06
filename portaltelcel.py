@@ -436,7 +436,7 @@ if archivo_a_procesar:
         else:
             st.error("La columna 'NOM_ESTRATEGIA' no se encontró en la base de datos.")
 
-except Exception as e:
-    st.error(f"Hubo un problema al leer el archivo. Error técnico: {e}")
+    except Exception as e:
+        st.error(f"Hubo un problema al leer el archivo. Error técnico: {e}")
 else:
     st.info("Obteniendo datos de Claro Drive o en espera de subida manual...")
