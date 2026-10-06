@@ -580,6 +580,7 @@ if archivo_a_procesar:
                 total_avance_mes = 0
                 total_asesores = 0
                 total_meta = 0
+                total_instaladas = 0
 
                 # -------------------------------------------------
                 # RECORRER LOS CAC
@@ -613,6 +614,15 @@ if archivo_a_procesar:
                         else 0
                     )
 
+                    instaladas = 0
+                    if 'FECHA_POSTEO' in df_cac.columns:
+                        instaladas = len(df_cac[
+                            (df_cac['FECHA_POSTEO'].dt.year == anio_seleccionado) & 
+                            (df_cac['FECHA_POSTEO'].dt.month == mes_seleccionado)
+                        ])
+
+                    efectividad = (instaladas / avance) if avance > 0 else 0
+
                     nombre_mostrar = nombres_simples.get(
                         cac,
                         cac
@@ -624,11 +634,17 @@ if archivo_a_procesar:
                         "Asesores": asesores,
                         "Meta": meta,
                         "Avance": porcentaje
+                        "Instaladas": instaladas,
+                        "Efect.": efectividad
                     })
 
                     total_avance_mes += avance
                     total_asesores += asesores
                     total_meta += meta
+                    total_instaladas += instaladas
+                total_porcentaje = (total_avance_mes / total_meta) if total_meta > 0 else 0
+                total_efectividad = (total_instaladas / total_avance_mes) if total_avance_mes > 0 else 0 # <--- Efectividad Total
+            
 
                 # -------------------------------------------------
                 # TOTAL DEL ÁREA
@@ -651,7 +667,9 @@ if archivo_a_procesar:
                         "Avance Mes": total_avance_mes,
                         "Asesores": total_asesores,
                         "Meta": total_meta,
-                        "Avance": total_porcentaje
+                        "Avance": total_porcentaje,
+                        "Instaladas": total_instaladas,
+                        "Efect.": total_efectividad
                     }
                 )
 
@@ -660,6 +678,10 @@ if archivo_a_procesar:
                 altura_tabla = (
                     (len(df_area) + 1) * 35 + 3
                 )
+                formato_columnas = {
+                    "Avance": "{:.0%}",
+                    "Efect.": "{:.0%}"
+                }
 
                 # -------------------------------------------------
                 # TABLA
@@ -682,6 +704,13 @@ if archivo_a_procesar:
                             format="%.2f",
                             min_value=0,
                             max_value=1
+                        )
+                        "Efect.": st.column_config.ProgressColumn(
+                            "Efect.",
+                            help="Efectividad (Instaladas / Avance Mes)",
+                            format="%.2f", 
+                            min_value=0,
+                            max_value=1,   
                         )
                     }
                 )
