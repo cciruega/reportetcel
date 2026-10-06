@@ -22,8 +22,6 @@ st.set_page_config(
 # 🎨 ESTILOS CORPORATIVOS
 # HEADER COMPLETO + SIDEBAR FUNCIONAL
 # ---------------------------------------------------------
-ocultar_iconos = """
-<style>
 
 /* =========================================================
    BOTÓN PARA ABRIR/CERRAR SIDEBAR
