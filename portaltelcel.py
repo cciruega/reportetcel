@@ -613,6 +613,8 @@ if archivo_a_procesar:
                         if meta > 0
                         else 0
                     )
+                    
+                    df_cac = df_filtrado[df_filtrado['NOM_ESTRATEGIA'] == cac]
 
                     instaladas = 0
                     if 'FECHA_POSTEO' in df_cac.columns:
