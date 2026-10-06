@@ -4,7 +4,6 @@ import datetime
 import requests
 import zipfile
 import io
-import streamlit as st
 
 def convertir_df_a_excel(df):
     output = io.BytesIO()
@@ -169,6 +168,20 @@ nombres_simples = {
     "2008604 TCC TAM122 TAMPICO IV4": "TAMPICO IV"
 }
 
+mapa_estados = {
+    "Nuevo León": [
+        "MONTERREY 1",
+        "MONTERREY 2",
+        "MONTERREY 3"
+    ],
+    "Tamaulipas": [
+        "CIUDAD VICTORIA",
+        "MATAMOROS-REYNOSA",
+        "NUEVO LAREDO",
+        "TAMPICO"
+    ]
+}
+
 st.markdown("<h1 style='text-align: center;'>Telmex-Telcel</h1>", unsafe_allow_html=True)
 
 st.markdown("---")
@@ -288,53 +301,164 @@ if archivo_a_procesar:
     
         # --- NUEVO: 3 y 4. FILTROS DE FECHA_CAPTURA (AÑO Y MES) ---
         if 'FECHA_CAPTURA' in df.columns:
-            # Aseguramos que la columna sea formato fecha
-            df['FECHA_CAPTURA'] = pd.to_datetime(df['FECHA_CAPTURA'], errors='coerce')
-            
-            # 3. Filtro de Año
-            # Obtenemos los años únicos disponibles, descartamos nulos y los ordenamos
-            anios_disponibles = sorted(df['FECHA_CAPTURA'].dt.year.dropna().unique().astype(int).tolist(), reverse=True)
-            
-            # Seleccionamos por defecto el año más reciente (el primero de la lista invertida)
-            default_anio_index = 0 if anios_disponibles else 0
-            
-            anio_seleccionado = st.sidebar.selectbox(
-                "Año de Captura", 
-                options=anios_disponibles, 
-                index=default_anio_index
-            )
-            
-            # Filtramos el dataframe temporalmente por el año seleccionado para obtener los meses de ese año
-            df_temp_anio = df[df['FECHA_CAPTURA'].dt.year == anio_seleccionado]
-            
-            # 4. Filtro de Mes
-            # Obtenemos los meses únicos disponibles para el año seleccionado
-            meses_disponibles = sorted(df_temp_anio['FECHA_CAPTURA'].dt.month.dropna().unique().astype(int).tolist(), reverse=True)
-            
-            # Seleccionamos por defecto el mes más reciente de ese año
-            default_mes_index = 0 if meses_disponibles else 0
-            
-            mes_seleccionado = st.sidebar.selectbox(
-                "Mes de Captura", 
-                options=meses_disponibles, 
-                index=default_mes_index
-            )
-            
-            # Aplicamos el filtro final de fecha al dataframe
-            df_filtrado = df[(df['FECHA_CAPTURA'].dt.year == anio_seleccionado) & (df['FECHA_CAPTURA'].dt.month == mes_seleccionado)]
-            
-        # Bloque de respaldo por si no encuentra FECHA_CAPTURA pero sí MES_CAPTURA (tu lógica anterior)
-        elif 'MES_CAPTURA' in df.columns:
-             # st.warning("No se encontró 'FECHA_CAPTURA'. Usando 'MES_CAPTURA'.")
-             df['MES_CAPTURA'] = pd.to_datetime(df['MES_CAPTURA'], errors='coerce')
-             meses_disponibles = sorted(df['MES_CAPTURA'].dt.month.dropna().unique().astype(int).tolist(), reverse=True)
-             mes_actual = datetime.datetime.now().month
-             default_index = meses_disponibles.index(mes_actual) if mes_actual in meses_disponibles else 0
-             mes_seleccionado = st.sidebar.selectbox("Mes de Captura (Número)", meses_disponibles, index=default_index)
-             df_filtrado = df[df['MES_CAPTURA'].dt.month == mes_seleccionado]
+
+    # Convertimos la columna a fecha
+    df['FECHA_CAPTURA'] = pd.to_datetime(
+        df['FECHA_CAPTURA'],
+        errors='coerce'
+    )
+
+    # Fecha actual
+    fecha_hoy = datetime.datetime.now()
+    anio_actual = fecha_hoy.year
+    mes_actual = fecha_hoy.month
+
+    # Años disponibles en la base
+    anios_disponibles = sorted(
+        df['FECHA_CAPTURA']
+        .dt.year
+        .dropna()
+        .unique()
+        .astype(int)
+        .tolist(),
+        reverse=True
+    )
+
+    # -------------------------------------------------
+    # FILTRO DE AÑO
+    # -------------------------------------------------
+    if anios_disponibles:
+
+        # Si existe el año actual, lo seleccionamos
+        # Si no, seleccionamos el año más reciente
+        if anio_actual in anios_disponibles:
+            anio_seleccionado = anio_actual
         else:
-            st.error("No se encontró la columna 'FECHA_CAPTURA'. Verifica el formato del archivo.")
-            df_filtrado = df
+            anio_seleccionado = anios_disponibles[0]
+
+        # Índice correspondiente al año seleccionado
+        indice_anio = anios_disponibles.index(anio_seleccionado)
+
+        anio_seleccionado = st.sidebar.selectbox(
+            "Año de Captura",
+            options=anios_disponibles,
+            index=indice_anio
+        )
+
+        # -------------------------------------------------
+        # OBTENER MESES DEL AÑO SELECCIONADO
+        # -------------------------------------------------
+        df_temp_anio = df[
+            df['FECHA_CAPTURA'].dt.year == anio_seleccionado
+        ]
+
+        meses_disponibles = sorted(
+            df_temp_anio['FECHA_CAPTURA']
+            .dt.month
+            .dropna()
+            .unique()
+            .astype(int)
+            .tolist(),
+            reverse=True
+        )
+
+        # -------------------------------------------------
+        # FILTRO DE MES
+        # -------------------------------------------------
+        if meses_disponibles:
+
+            # Si existe el mes actual, lo seleccionamos
+            # Si no, seleccionamos el mes más reciente
+            if (
+                anio_seleccionado == anio_actual
+                and mes_actual in meses_disponibles
+            ):
+                mes_seleccionado = mes_actual
+            else:
+                mes_seleccionado = meses_disponibles[0]
+
+            indice_mes = meses_disponibles.index(mes_seleccionado)
+
+            mes_seleccionado = st.sidebar.selectbox(
+                "Mes de Captura",
+                options=meses_disponibles,
+                index=indice_mes
+            )
+
+            # -------------------------------------------------
+            # APLICAR FILTROS
+            # -------------------------------------------------
+            df_filtrado = df[
+                (df['FECHA_CAPTURA'].dt.year == anio_seleccionado) &
+                (df['FECHA_CAPTURA'].dt.month == mes_seleccionado)
+            ]
+
+        else:
+            st.warning(
+                f"No hay meses disponibles para el año {anio_seleccionado}."
+            )
+            df_filtrado = df.copy()
+
+    else:
+        st.warning(
+            "No se encontraron fechas válidas en la columna FECHA_CAPTURA."
+        )
+        df_filtrado = df.copy()
+
+
+# ---------------------------------------------------------
+# RESPALDO: MES_CAPTURA
+# ---------------------------------------------------------
+elif 'MES_CAPTURA' in df.columns:
+
+    df['MES_CAPTURA'] = pd.to_datetime(
+        df['MES_CAPTURA'],
+        errors='coerce'
+    )
+
+    meses_disponibles = sorted(
+        df['MES_CAPTURA']
+        .dt.month
+        .dropna()
+        .unique()
+        .astype(int)
+        .tolist(),
+        reverse=True
+    )
+
+    mes_actual = datetime.datetime.now().month
+
+    if meses_disponibles:
+
+        if mes_actual in meses_disponibles:
+            mes_seleccionado = mes_actual
+        else:
+            mes_seleccionado = meses_disponibles[0]
+
+        indice_mes = meses_disponibles.index(mes_seleccionado)
+
+        mes_seleccionado = st.sidebar.selectbox(
+            "Mes de Captura (Número)",
+            options=meses_disponibles,
+            index=indice_mes
+        )
+
+        df_filtrado = df[
+            df['MES_CAPTURA'].dt.month == mes_seleccionado
+        ]
+
+    else:
+        st.warning(
+            "No se encontraron meses válidos en MES_CAPTURA."
+        )
+        df_filtrado = df.copy()
+
+else:
+    st.error(
+        "No se encontró la columna 'FECHA_CAPTURA' ni 'MES_CAPTURA'. "
+        "Verifica el formato del archivo."
+    )
+    df_filtrado = df.copy()
     
         if 'NOM_ESTRATEGIA' in df_filtrado.columns:
             
