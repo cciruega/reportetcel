@@ -726,8 +726,3 @@ else:
         "Obteniendo datos de Claro Drive "
         "o en espera de subida manual..."
     )
-
-    except Exception as e:
-        st.error(f"Hubo un problema al leer el archivo. Error técnico: {e}")
-else:
-    st.info("Obteniendo datos de Claro Drive o en espera de subida manual...")
