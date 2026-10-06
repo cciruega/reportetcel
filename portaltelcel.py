@@ -637,7 +637,7 @@ if archivo_a_procesar:
                         "Meta": meta,
                         "Avance": porcentaje,
                         "Instaladas": instaladas,
-                        "Efect.": efectividad
+                        "Efectividad": efectividad
                     })
 
                     total_avance_mes += avance
@@ -671,7 +671,7 @@ if archivo_a_procesar:
                         "Meta": total_meta,
                         "Avance": total_porcentaje,
                         "Instaladas": total_instaladas,
-                        "Efect.": total_efectividad
+                        "Efectividad": total_efectividad
                     }
                 )
 
@@ -682,7 +682,7 @@ if archivo_a_procesar:
                 )
                 formato_columnas = {
                     "Avance": "{:.0%}",
-                    "Efect.": "{:.0%}"
+                    "Efectividad": "{:.0%}"
                 }
 
                 # -------------------------------------------------
@@ -707,8 +707,8 @@ if archivo_a_procesar:
                             min_value=0,
                             max_value=1
                         ),
-                        "Efect.": st.column_config.ProgressColumn(
-                            "Efect.",
+                        "Efectividad": st.column_config.ProgressColumn(
+                            "Efectividad",
                             help="Efectividad (Instaladas / Avance Mes)",
                             format="%.2f", 
                             min_value=0,
