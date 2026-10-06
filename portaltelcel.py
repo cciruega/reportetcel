@@ -16,6 +16,7 @@ st.set_page_config(
     page_title="Dashboard de Resultados",
     page_icon="reportetcel/telcel2.ico",  # Puede ser una ruta local o una URL
     layout="wide",
+    initial_sidebar_state="expanded"
 )
 
 # ---------------------------------------------------------
@@ -27,55 +28,10 @@ st.markdown("""
 <style>
 
 /* =========================================================
-   HEADER SUPERIOR
-   ========================================================= */
-[data-testid="stHeader"] {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    width: 100% !important;
-    min-height: 2.5rem !important;
-    background: transparent !important;
-    z-index: 999999 !important;
-}
-
-/* =========================================================
-   BOTÓN PARA ABRIR / CERRAR SIDEBAR
-   ========================================================= */
-[data-testid="stSidebarCollapsedControl"] {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    z-index: 1000000 !important;
-}
-
-/* =========================================================
-   SIDEBAR
-   ========================================================= */
-[data-testid="stSidebar"] {
-    z-index: 999998 !important;
-}
-
-/* =========================================================
-   OCULTAR BARRA DE HERRAMIENTAS
-   ========================================================= */
-[data-testid="stToolbar"] {
-    display: none !important;
-}
-
-/* =========================================================
    OCULTAR FOOTER
    ========================================================= */
 footer {
     display: none !important;
-}
-
-/* =========================================================
-   MANTENER HEADER VISIBLE
-   ========================================================= */
-.stApp > header {
-    display: flex !important;
-    background-color: transparent !important;
 }
 
 </style>
