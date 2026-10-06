@@ -1,2 +1,4 @@
 [theme]
 primaryColor = "#0055A5"
+[ui]
+toolbarMode = "minimal"
