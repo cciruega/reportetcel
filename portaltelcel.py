@@ -268,7 +268,7 @@ if archivo_a_procesar:
         # ---------------------------------------------------------
         # 1. FILTRO DE ESTADO
         # ---------------------------------------------------------
-        estado_seleccionado = st.sidebar.selectbox(
+        estado_seleccionado = st.sidebar.multiselect(
             "Selecciona Estado:",
             options=list(mapa_estados.keys())
         )
@@ -280,7 +280,7 @@ if archivo_a_procesar:
 
         opciones_area = ["TODAS"] + areas_disponibles
 
-        area_seleccionada = st.sidebar.selectbox(
+        area_seleccionada = st.sidebar.multiselect(
             "Selecciona Área:",
             options=opciones_area
         )
