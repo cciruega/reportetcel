@@ -358,7 +358,6 @@ if archivo_a_procesar:
                         avance = avance_fila['Avance Mes'].values[0] if not avance_fila.empty else 0
                         asesores = catalogo_asesores.get(cac, 0)
                         meta = asesores * 2
-                        # Calculamos directamente de 0 a 100
                         porcentaje = (avance / meta * 100 if meta > 0 else 0)
                         
                         df_cac = df_filtrado[df_filtrado['NOM_ESTRATEGIA'] == cac]
@@ -369,7 +368,6 @@ if archivo_a_procesar:
                             except NameError:
                                 instaladas = len(df_cac[df_cac['FECHA_POSTEO'].dt.month == mes_seleccionado])
 
-                        # Calculamos directamente de 0 a 100
                         efectividad = (instaladas / avance * 100) if avance > 0 else 0
                         datos_area.append({
                             "Area/CAC": nombres_simples.get(cac, cac),
@@ -382,11 +380,9 @@ if archivo_a_procesar:
                         total_meta += meta
                         total_instaladas += instaladas
 
-                    # Totales del área también en escala 0-100
                     total_porcentaje = (total_avance_mes / total_meta * 100) if total_meta > 0 else 0
                     total_efectividad = (total_instaladas / total_avance_mes * 100) if total_avance_mes > 0 else 0 
 
-                    # Aquí ya no multiplicamos por 100 porque ya viene en esa escala
                     ranking_areas.append({"Área": area, "Cumplimiento %": total_porcentaje})
 
                     datos_area.insert(0, {
@@ -400,7 +396,6 @@ if archivo_a_procesar:
                         df_area.style.map(colorear_semaforo, subset=['Avance']),
                         width="content", hide_index=True, height=((len(df_area) + 1) * 35 + 3),
                         column_config={
-                            # Ajustamos max_value a 100 y format a "%.0f%%"
                             "Avance": st.column_config.ProgressColumn("Avance", format="%.0f%%", min_value=0, max_value=100),
                             "Efectividad": st.column_config.ProgressColumn("Efectividad", format="%.0f%%", min_value=0, max_value=100)
                         }
@@ -420,13 +415,23 @@ if archivo_a_procesar:
                 st.error("La columna 'NOM_ESTRATEGIA' no se encontró.")
 
         # =========================================================
-        # 7. VISTA COPEs
+        # 7. VISTA COPEs (FILTRADA POR SUBCANAL CAC)
         # =========================================================
         elif tipo_vista == "COPEs":
             if 'CT' in df_filtrado.columns:
-                resumen_copes = df_filtrado.groupby('CT').size().reset_index(name='Venta Mes')
+                
+                # ------ NUEVO: FILTRO POR TELCEL_SUBCANAL ------
+                if 'TELCEL_SUBCANAL' in df_filtrado.columns:
+                    # Filtramos asegurándonos de evitar problemas de espacios o mayúsculas en el Excel
+                    df_copes_filtrado = df_filtrado[df_filtrado['TELCEL_SUBCANAL'].astype(str).str.strip().str.upper() == 'CAC'].copy()
+                else:
+                    st.warning("⚠️ No se encontró la columna 'TELCEL_SUBCANAL' para filtrar. Se mostrarán todos los subcanales.")
+                    df_copes_filtrado = df_filtrado.copy()
+                # -----------------------------------------------
+                
+                resumen_copes = df_copes_filtrado.groupby('CT').size().reset_index(name='Venta Mes')
 
-                st.header("Resultados por COPEs (CT)")
+                st.header("Resultados por COPEs (CT) - Subcanal CAC")
 
                 for area, copes in estructura_cope_filtrada.items():
                     st.subheader(area)
@@ -439,7 +444,8 @@ if archivo_a_procesar:
                         venta_fila = resumen_copes[resumen_copes['CT'] == ct]
                         venta = venta_fila['Venta Mes'].values[0] if not venta_fila.empty else 0
 
-                        df_ct = df_filtrado[df_filtrado['CT'] == ct]
+                        # Usamos df_copes_filtrado en lugar de df_filtrado
+                        df_ct = df_copes_filtrado[df_copes_filtrado['CT'] == ct]
                         instaladas = 0
                         if 'FECHA_POSTEO' in df_ct.columns:
                             try:
@@ -447,7 +453,6 @@ if archivo_a_procesar:
                             except NameError:
                                 instaladas = len(df_ct[df_ct['FECHA_POSTEO'].dt.month == mes_seleccionado])
 
-                        # Calculamos directamente de 0 a 100
                         efectividad = (instaladas / venta * 100) if venta > 0 else 0
 
                         datos_cope_area.append({
@@ -465,7 +470,7 @@ if archivo_a_procesar:
                         
                         df_copes_area = pd.DataFrame(datos_cope_area)
                         
-                        # Fila de Total General al final (como en tu imagen)
+                        # Fila de Total General al final
                         fila_total = pd.DataFrame([{
                             "Etiquetas de fila": "Total general",
                             "Venta Mes": total_venta_area,
@@ -478,20 +483,20 @@ if archivo_a_procesar:
                             df_copes_area.style.map(colorear_semaforo, subset=['Efectividad']),
                             width="content", hide_index=True, height=((len(df_copes_area) + 1) * 35 + 3),
                             column_config={
-                                # Ajustamos max_value a 100 y format a "%.0f%%"
                                 "Efectividad": st.column_config.ProgressColumn("Efectividad", format="%.0f%%", min_value=0, max_value=100)
                             }
                         )
 
                         # Botón de Descarga DETALLE por Área (COPEs folios)
-                        df_detalle_cope_area = df_filtrado[df_filtrado['CT'].isin(copes)]
+                        # Descarga solo la información del subcanal CAC
+                        df_detalle_cope_area = df_copes_filtrado[df_copes_filtrado['CT'].isin(copes)]
                         generar_boton_descarga(
                             df_detalle_cope_area, 
                             nombre_archivo=f"Detalle_COPE_{area.replace(' ', '_')}", 
                             btn_key=f"btn_cope_{area}"
                         )
                     else:
-                        st.info(f"No hay registros de COPEs para {area}.")
+                        st.info(f"No hay registros de COPEs (CAC) para {area}.")
                         
                     st.markdown("---")
             else:
