@@ -36,9 +36,10 @@ footer {
 def colorear_semaforo(val):
     if isinstance(val, str):
         return ''
-    if val >= 0.80:
+    # Ahora evaluamos en escala de 0 a 100
+    if val >= 80.0:
         color = '#28a745' # Verde
-    elif val >= 0.50:
+    elif val >= 50.0:
         color = '#ffc107' # Amarillo/Naranja
     else:
         color = '#dc3545' # Rojo
@@ -48,10 +49,13 @@ def generar_boton_descarga(df, nombre_archivo, btn_key):
     try:
         df_export = df.copy()
         
-        # Formateo solo si existe Avance
-        if 'Avance' in df_export.columns:
-            df_export['Avance'] = pd.to_numeric(df_export['Avance'], errors='coerce').fillna(0)
-            df_export['Avance'] = df_export['Avance'].apply(lambda x: f"{x:.0%}")
+        # Formateo seguro para Excel: Se aplica a Avance y Efectividad
+        columnas_porcentaje = ['Avance', 'Efectividad']
+        for col in columnas_porcentaje:
+            if col in df_export.columns:
+                df_export[col] = pd.to_numeric(df_export[col], errors='coerce').fillna(0)
+                # Como ahora los datos vienen de 0 a 100, solo agregamos el símbolo %
+                df_export[col] = df_export[col].apply(lambda x: f"{x:.0f}%")
             
         output = io.BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
@@ -354,7 +358,8 @@ if archivo_a_procesar:
                         avance = avance_fila['Avance Mes'].values[0] if not avance_fila.empty else 0
                         asesores = catalogo_asesores.get(cac, 0)
                         meta = asesores * 2
-                        porcentaje = (avance / meta if meta > 0 else 0)
+                        # Calculamos directamente de 0 a 100
+                        porcentaje = (avance / meta * 100 if meta > 0 else 0)
                         
                         df_cac = df_filtrado[df_filtrado['NOM_ESTRATEGIA'] == cac]
                         instaladas = 0
@@ -364,7 +369,8 @@ if archivo_a_procesar:
                             except NameError:
                                 instaladas = len(df_cac[df_cac['FECHA_POSTEO'].dt.month == mes_seleccionado])
 
-                        efectividad = (instaladas / avance) if avance > 0 else 0
+                        # Calculamos directamente de 0 a 100
+                        efectividad = (instaladas / avance * 100) if avance > 0 else 0
                         datos_area.append({
                             "Area/CAC": nombres_simples.get(cac, cac),
                             "Avance Mes": avance, "Asesores": asesores, "Meta": meta,
@@ -376,10 +382,12 @@ if archivo_a_procesar:
                         total_meta += meta
                         total_instaladas += instaladas
 
-                    total_porcentaje = (total_avance_mes / total_meta) if total_meta > 0 else 0
-                    total_efectividad = (total_instaladas / total_avance_mes) if total_avance_mes > 0 else 0 
+                    # Totales del área también en escala 0-100
+                    total_porcentaje = (total_avance_mes / total_meta * 100) if total_meta > 0 else 0
+                    total_efectividad = (total_instaladas / total_avance_mes * 100) if total_avance_mes > 0 else 0 
 
-                    ranking_areas.append({"Área": area, "Cumplimiento %": total_porcentaje * 100})
+                    # Aquí ya no multiplicamos por 100 porque ya viene en esa escala
+                    ranking_areas.append({"Área": area, "Cumplimiento %": total_porcentaje})
 
                     datos_area.insert(0, {
                         "Area/CAC": f"[-]{area} (TOTAL)",
@@ -389,11 +397,12 @@ if archivo_a_procesar:
 
                     df_area = pd.DataFrame(datos_area)
                     st.dataframe(
-                        df_area.style.format({"Avance": "{:.0%}"}).map(colorear_semaforo, subset=['Avance']),
+                        df_area.style.map(colorear_semaforo, subset=['Avance']),
                         width="content", hide_index=True, height=((len(df_area) + 1) * 35 + 3),
                         column_config={
-                            "Avance": st.column_config.ProgressColumn("Avance", format="%.2f", min_value=0, max_value=1),
-                            "Efectividad": st.column_config.ProgressColumn("Efectividad", format="%.2f", min_value=0, max_value=1)
+                            # Ajustamos max_value a 100 y format a "%.0f%%"
+                            "Avance": st.column_config.ProgressColumn("Avance", format="%.0f%%", min_value=0, max_value=100),
+                            "Efectividad": st.column_config.ProgressColumn("Efectividad", format="%.0f%%", min_value=0, max_value=100)
                         }
                     )
 
@@ -438,7 +447,8 @@ if archivo_a_procesar:
                             except NameError:
                                 instaladas = len(df_ct[df_ct['FECHA_POSTEO'].dt.month == mes_seleccionado])
 
-                        efectividad = (instaladas / venta) if venta > 0 else 0
+                        # Calculamos directamente de 0 a 100
+                        efectividad = (instaladas / venta * 100) if venta > 0 else 0
 
                         datos_cope_area.append({
                             "Etiquetas de fila": ct,
@@ -451,7 +461,7 @@ if archivo_a_procesar:
                         total_instaladas_area += instaladas
 
                     if datos_cope_area:
-                        total_efectividad_area = (total_instaladas_area / total_venta_area) if total_venta_area > 0 else 0
+                        total_efectividad_area = (total_instaladas_area / total_venta_area * 100) if total_venta_area > 0 else 0
                         
                         df_copes_area = pd.DataFrame(datos_cope_area)
                         
@@ -465,10 +475,11 @@ if archivo_a_procesar:
                         df_copes_area = pd.concat([df_copes_area, fila_total], ignore_index=True)
 
                         st.dataframe(
-                            df_copes_area.style.format({"Efectividad": "{:.0%}"}).map(colorear_semaforo, subset=['Efectividad']),
+                            df_copes_area.style.map(colorear_semaforo, subset=['Efectividad']),
                             width="content", hide_index=True, height=((len(df_copes_area) + 1) * 35 + 3),
                             column_config={
-                                "Efectividad": st.column_config.ProgressColumn("Efectividad", format="%.0f%%", min_value=0, max_value=1)
+                                # Ajustamos max_value a 100 y format a "%.0f%%"
+                                "Efectividad": st.column_config.ProgressColumn("Efectividad", format="%.0f%%", min_value=0, max_value=100)
                             }
                         )
 
