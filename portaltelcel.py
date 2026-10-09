@@ -266,9 +266,20 @@ if archivo_a_procesar:
         st.sidebar.header("Filtros Principales")
 
         # ---------------------------------------------------------
+        # NUEVO: FILTRO TIPO DE VISTA (CACs vs COPEs)
+        # ---------------------------------------------------------
+        tipo_vista = st.sidebar.radio(
+            "Selecciona la Vista:",
+            options=["CACs", "COPEs"],
+            index=0,
+            help="Elige si deseas ver el reporte por CACs (default) o agrupado por COPEs (CT)."
+        )
+
+        st.sidebar.markdown("---")
+
+        # ---------------------------------------------------------
         # 1. FILTRO DE ESTADO - SELECCIÓN MÚLTIPLE
         # ---------------------------------------------------------
-
         estados_disponibles = list(mapa_estados.keys())
         
         estados_seleccionados = st.sidebar.multiselect(
@@ -278,45 +289,22 @@ if archivo_a_procesar:
             help="Puedes seleccionar uno o varios estados."
         )
         
-        # ---------------------------------------------------------
-        # VALIDAR ESTADO
-        # ---------------------------------------------------------
-        
         if not estados_seleccionados:
-        
-            st.sidebar.warning(
-                "Selecciona al menos un Estado."
-            )
-        
+            st.sidebar.warning("Selecciona al menos un Estado.")
             st.stop()
-        
         
         # ---------------------------------------------------------
         # 2. OBTENER ÁREAS DE LOS ESTADOS SELECCIONADOS
         # ---------------------------------------------------------
-        
         areas_disponibles = []
-        
         for estado in estados_seleccionados:
+            areas_disponibles.extend(mapa_estados.get(estado, []))
         
-            areas_disponibles.extend(
-                mapa_estados.get(estado, [])
-            )
-        
-        
-        # ---------------------------------------------------------
-        # ELIMINAR POSIBLES DUPLICADOS
-        # ---------------------------------------------------------
-        
-        areas_disponibles = list(
-            dict.fromkeys(areas_disponibles)
-        )
-        
+        areas_disponibles = list(dict.fromkeys(areas_disponibles))
         
         # ---------------------------------------------------------
         # 3. FILTRO DE ÁREA - SELECCIÓN MÚLTIPLE
         # ---------------------------------------------------------
-        
         area_seleccionada = st.sidebar.multiselect(
             "Selecciona Área:",
             options=areas_disponibles,
@@ -324,469 +312,343 @@ if archivo_a_procesar:
             help="Puedes seleccionar una o varias áreas."
         )
         
-        
-        # ---------------------------------------------------------
-        # VALIDAR ÁREA
-        # ---------------------------------------------------------
-        
         if not area_seleccionada:
-        
-            st.sidebar.warning(
-                "Selecciona al menos un Área."
-            )
-        
+            st.sidebar.warning("Selecciona al menos un Área.")
             st.stop()
-        
         
         # ---------------------------------------------------------
         # 4. FILTRAR ESTRUCTURA CAC
         # ---------------------------------------------------------
-        
         estructura_cac_filtrada = {
-            k: v
-            for k, v in estructura_cac.items()
-            if k in area_seleccionada
+            k: v for k, v in estructura_cac.items() if k in area_seleccionada
         }
 
         # =========================================================
-        # 3. FILTRO DE FECHA_CAPTURA
+        # 5. FILTRO DE FECHA_CAPTURA
         # =========================================================
         if 'FECHA_CAPTURA' in df.columns:
 
-            # Convertir columna a fecha
-            df['FECHA_CAPTURA'] = pd.to_datetime(
-                df['FECHA_CAPTURA'],
-                errors='coerce'
-            )
-
-            # -----------------------------------------------------
-            # FECHA ACTUAL
-            # -----------------------------------------------------
+            df['FECHA_CAPTURA'] = pd.to_datetime(df['FECHA_CAPTURA'], errors='coerce')
             fecha_hoy = datetime.datetime.now()
-
             anio_actual = fecha_hoy.year
             mes_actual = fecha_hoy.month
 
-            # -----------------------------------------------------
-            # AÑOS DISPONIBLES
-            # -----------------------------------------------------
             anios_disponibles = sorted(
-                df['FECHA_CAPTURA']
-                .dt.year
-                .dropna()
-                .unique()
-                .astype(int)
-                .tolist(),
+                df['FECHA_CAPTURA'].dt.year.dropna().unique().astype(int).tolist(),
                 reverse=True
             )
 
-            # -----------------------------------------------------
-            # VALIDAR QUE EXISTAN AÑOS
-            # -----------------------------------------------------
             if anios_disponibles:
-
-                # Si existe el año actual, usarlo.
-                # Si no existe, usar el año más reciente.
                 if anio_actual in anios_disponibles:
-
                     anio_predeterminado = anio_actual
-
                 else:
-
                     anio_predeterminado = anios_disponibles[0]
 
-                # Obtener posición del año
-                indice_anio = anios_disponibles.index(
-                    anio_predeterminado
-                )
+                indice_anio = anios_disponibles.index(anio_predeterminado)
+                anio_seleccionado = st.sidebar.selectbox("Año de Captura", options=anios_disponibles, index=indice_anio)
 
-                # Selector de año
-                anio_seleccionado = st.sidebar.selectbox(
-                    "Año de Captura",
-                    options=anios_disponibles,
-                    index=indice_anio
-                )
-
-                # -------------------------------------------------
-                # MESES DISPONIBLES PARA EL AÑO
-                # -------------------------------------------------
-                df_temp_anio = df[
-                    df['FECHA_CAPTURA'].dt.year == anio_seleccionado
-                ]
-
+                df_temp_anio = df[df['FECHA_CAPTURA'].dt.year == anio_seleccionado]
                 meses_disponibles = sorted(
-                    df_temp_anio['FECHA_CAPTURA']
-                    .dt.month
-                    .dropna()
-                    .unique()
-                    .astype(int)
-                    .tolist(),
+                    df_temp_anio['FECHA_CAPTURA'].dt.month.dropna().unique().astype(int).tolist(),
                     reverse=True
                 )
 
-                # -------------------------------------------------
-                # VALIDAR QUE EXISTAN MESES
-                # -------------------------------------------------
                 if meses_disponibles:
-
-                    # Si es el año actual y existe
-                    # el mes actual, seleccionarlo.
-                    if (
-                        anio_seleccionado == anio_actual
-                        and mes_actual in meses_disponibles
-                    ):
-
+                    if (anio_seleccionado == anio_actual and mes_actual in meses_disponibles):
                         mes_predeterminado = mes_actual
-
                     else:
-
-                        # Si no existe el mes actual,
-                        # seleccionar el mes más reciente.
                         mes_predeterminado = meses_disponibles[0]
 
-                    # Obtener posición del mes
-                    indice_mes = meses_disponibles.index(
-                        mes_predeterminado
-                    )
+                    indice_mes = meses_disponibles.index(mes_predeterminado)
+                    mes_seleccionado = st.sidebar.selectbox("Mes de Captura", options=meses_disponibles, index=indice_mes)
 
-                    # Selector de mes
-                    mes_seleccionado = st.sidebar.selectbox(
-                        "Mes de Captura",
-                        options=meses_disponibles,
-                        index=indice_mes
-                    )
-
-                    # -------------------------------------------------
-                    # APLICAR FILTRO DE FECHA
-                    # -------------------------------------------------
                     df_filtrado = df[
-                        (df['FECHA_CAPTURA'].dt.year == anio_seleccionado)
-                        &
+                        (df['FECHA_CAPTURA'].dt.year == anio_seleccionado) &
                         (df['FECHA_CAPTURA'].dt.month == mes_seleccionado)
                     ]
-
                 else:
-
-                    st.warning(
-                        f"No hay meses disponibles para "
-                        f"el año {anio_seleccionado}."
-                    )
-
+                    st.warning(f"No hay meses disponibles para el año {anio_seleccionado}.")
                     df_filtrado = df.copy()
-
             else:
-
-                st.warning(
-                    "No se encontraron fechas válidas "
-                    "en FECHA_CAPTURA."
-                )
-
+                st.warning("No se encontraron fechas válidas en FECHA_CAPTURA.")
                 df_filtrado = df.copy()
 
         # =========================================================
-        # 4. RESPALDO: MES_CAPTURA
+        # 5. RESPALDO: MES_CAPTURA
         # =========================================================
         elif 'MES_CAPTURA' in df.columns:
-
-            df['MES_CAPTURA'] = pd.to_datetime(
-                df['MES_CAPTURA'],
-                errors='coerce'
-            )
-
+            df['MES_CAPTURA'] = pd.to_datetime(df['MES_CAPTURA'], errors='coerce')
             meses_disponibles = sorted(
-                df['MES_CAPTURA']
-                .dt.month
-                .dropna()
-                .unique()
-                .astype(int)
-                .tolist(),
+                df['MES_CAPTURA'].dt.month.dropna().unique().astype(int).tolist(),
                 reverse=True
             )
 
             if meses_disponibles:
-
                 mes_actual = datetime.datetime.now().month
-
                 if mes_actual in meses_disponibles:
-
                     mes_predeterminado = mes_actual
-
                 else:
-
                     mes_predeterminado = meses_disponibles[0]
 
-                indice_mes = meses_disponibles.index(
-                    mes_predeterminado
-                )
+                indice_mes = meses_disponibles.index(mes_predeterminado)
+                mes_seleccionado = st.sidebar.selectbox("Mes de Captura (Número)", options=meses_disponibles, index=indice_mes)
 
-                mes_seleccionado = st.sidebar.selectbox(
-                    "Mes de Captura (Número)",
-                    options=meses_disponibles,
-                    index=indice_mes
-                )
-
-                df_filtrado = df[
-                    df['MES_CAPTURA'].dt.month == mes_seleccionado
-                ]
-
+                df_filtrado = df[df['MES_CAPTURA'].dt.month == mes_seleccionado]
             else:
-
-                st.warning(
-                    "No se encontraron meses válidos "
-                    "en MES_CAPTURA."
-                )
-
+                st.warning("No se encontraron meses válidos en MES_CAPTURA.")
                 df_filtrado = df.copy()
 
         # =========================================================
-        # 5. NO EXISTE FECHA_CAPTURA NI MES_CAPTURA
+        # SIN FECHAS VÁLIDAS
         # =========================================================
         else:
-
-            st.error(
-                "No se encontró la columna 'FECHA_CAPTURA' "
-                "ni 'MES_CAPTURA'. Verifica el formato del archivo."
-            )
-
+            st.error("No se encontró 'FECHA_CAPTURA' ni 'MES_CAPTURA'. Verifica el archivo.")
             df_filtrado = df.copy()
 
         # =========================================================
-        # 6. RESULTADOS POR CAC
+        # 6. LÓGICA DE VISTAS (CACs vs COPEs)
         # =========================================================
-        if 'NOM_ESTRATEGIA' in df_filtrado.columns:
+        if tipo_vista == "CACs":
+            
+            if 'NOM_ESTRATEGIA' in df_filtrado.columns:
+                resumen_cacs = (
+                    df_filtrado
+                    .groupby('NOM_ESTRATEGIA')
+                    .size()
+                    .reset_index(name='Avance Mes')
+                )
 
-            resumen_cacs = (
-                df_filtrado
-                .groupby('NOM_ESTRATEGIA')
-                .size()
-                .reset_index(name='Avance Mes')
-            )
+                st.header("Resultados por CAC asociado al Area TMX")
 
-            st.header(
-                "Resultados por CAC asociado al Area TMX"
-            )
+                ranking_areas = []
 
-            ranking_areas = []
+                for area, cacs in estructura_cac_filtrada.items():
+                    st.subheader(area)
 
-            # -----------------------------------------------------
-            # RECORRER LAS ÁREAS
-            # -----------------------------------------------------
-            for area, cacs in estructura_cac_filtrada.items():
+                    datos_area = []
+                    total_avance_mes = 0
+                    total_asesores = 0
+                    total_meta = 0
+                    total_instaladas = 0
 
-                st.subheader(area)
+                    for cac in cacs:
+                        avance_fila = resumen_cacs[resumen_cacs['NOM_ESTRATEGIA'] == cac]
+                        avance = avance_fila['Avance Mes'].values[0] if not avance_fila.empty else 0
+                        asesores = catalogo_asesores.get(cac, 0)
+                        meta = asesores * 2
+                        porcentaje = (avance / meta if meta > 0 else 0)
+                        
+                        df_cac = df_filtrado[df_filtrado['NOM_ESTRATEGIA'] == cac]
+                        instaladas = 0
+                        if 'FECHA_POSTEO' in df_cac.columns:
+                            try:
+                                instaladas = len(df_cac[
+                                    (df_cac['FECHA_POSTEO'].dt.year == anio_seleccionado) & 
+                                    (df_cac['FECHA_POSTEO'].dt.month == mes_seleccionado)
+                                ])
+                            except NameError:
+                                # Fallback por si usamos la columna 'MES_CAPTURA' y 'anio_seleccionado' no existe
+                                instaladas = len(df_cac[df_cac['FECHA_POSTEO'].dt.month == mes_seleccionado])
 
-                datos_area = []
+                        efectividad = (instaladas / avance) if avance > 0 else 0
+                        nombre_mostrar = nombres_simples.get(cac, cac)
 
-                total_avance_mes = 0
-                total_asesores = 0
-                total_meta = 0
+                        datos_area.append({
+                            "Area/CAC": nombre_mostrar,
+                            "Avance Mes": avance,
+                            "Asesores": asesores,
+                            "Meta": meta,
+                            "Avance": porcentaje,
+                            "Instaladas": instaladas,
+                            "Efectividad": efectividad
+                        })
+
+                        total_avance_mes += avance
+                        total_asesores += asesores
+                        total_meta += meta
+                        total_instaladas += instaladas
+
+                    total_porcentaje = (total_avance_mes / total_meta) if total_meta > 0 else 0
+                    total_efectividad = (total_instaladas / total_avance_mes) if total_avance_mes > 0 else 0 
+
+                    ranking_areas.append({
+                        "Área": area,
+                        "Cumplimiento %": total_porcentaje * 100
+                    })
+
+                    datos_area.insert(
+                        0,
+                        {
+                            "Area/CAC": f"[-]{area} (TOTAL)",
+                            "Avance Mes": total_avance_mes,
+                            "Asesores": total_asesores,
+                            "Meta": total_meta,
+                            "Avance": total_porcentaje,
+                            "Instaladas": total_instaladas,
+                            "Efectividad": total_efectividad
+                        }
+                    )
+
+                    df_area = pd.DataFrame(datos_area)
+                    altura_tabla = ((len(df_area) + 1) * 35 + 3)
+
+                    st.dataframe(
+                        df_area
+                        .style
+                        .format({"Avance": "{:.0%}"})
+                        .map(colorear_semaforo, subset=['Avance']),
+                        width="content",
+                        hide_index=True,
+                        height=altura_tabla,
+                        column_config={
+                            "Avance": st.column_config.ProgressColumn(
+                                "Avance",
+                                help="Cumplimiento de la meta",
+                                format="%.2f",
+                                min_value=0,
+                                max_value=1
+                            ),
+                            "Efectividad": st.column_config.ProgressColumn(
+                                "Efectividad",
+                                help="Efectividad (Instaladas / Avance Mes)",
+                                format="%.2f", 
+                                min_value=0,
+                                max_value=1,   
+                            )
+                        }
+                    )
+
+                    df_detalle_area = df_filtrado[df_filtrado['NOM_ESTRATEGIA'].isin(cacs)]
+                    area_limpia = area.replace(" ", "_")
+                    generar_boton_descarga(
+                        df_detalle_area,
+                        nombre_archivo=f"Detalle_{area_limpia}",
+                        btn_key=f"btn_descarga_{area_limpia}"
+                    )
+
+                    st.markdown("---")
+
+                st.divider()
+
+                if ranking_areas:
+                    st.subheader("📊 Ranking Global de Cumplimiento")
+                    df_ranking = pd.DataFrame(ranking_areas)
+                    df_ranking = df_ranking.sort_values(by="Cumplimiento %", ascending=False)
+                    st.bar_chart(df_ranking.set_index("Área")["Cumplimiento %"])
+                else:
+                    st.info("No hay datos para mostrar el ranking con los filtros seleccionados.")
+
+            else:
+                st.error("La columna 'NOM_ESTRATEGIA' no se encontró en la base de datos.")
+
+        # =========================================================
+        # 7. RESULTADOS POR COPEs (NUEVA LÓGICA)
+        # =========================================================
+        elif tipo_vista == "COPEs":
+            if 'CT' in df_filtrado.columns:
+                st.header("Resultados por COPEs (CT)")
+
+                # Filtrar para mantener congruencia con las áreas seleccionadas (por sus CACs)
+                df_copes_base = df_filtrado.copy()
+                if 'NOM_ESTRATEGIA' in df_copes_base.columns:
+                    cacs_validos = [cac for cacs in estructura_cac_filtrada.values() for cac in cacs]
+                    if cacs_validos:
+                        df_copes_base = df_copes_base[df_copes_base['NOM_ESTRATEGIA'].isin(cacs_validos)]
+
+                # Agrupar datos por la columna CT
+                resumen_copes = (
+                    df_copes_base
+                    .groupby('CT')
+                    .size()
+                    .reset_index(name='Venta Mes')
+                )
+
+                datos_cope = []
+                total_venta = 0
                 total_instaladas = 0
 
-                # -------------------------------------------------
-                # RECORRER LOS CAC
-                # -------------------------------------------------
-                for cac in cacs:
+                cts_unicos = resumen_copes['CT'].unique()
 
-                    avance_fila = resumen_cacs[
-                        resumen_cacs['NOM_ESTRATEGIA'] == cac
-                    ]
+                for ct in cts_unicos:
+                    venta = resumen_copes[resumen_copes['CT'] == ct]['Venta Mes'].values[0]
 
-                    if not avance_fila.empty:
-
-                        avance = avance_fila[
-                            'Avance Mes'
-                        ].values[0]
-
-                    else:
-
-                        avance = 0
-
-                    asesores = catalogo_asesores.get(
-                        cac,
-                        0
-                    )
-
-                    meta = asesores * 2
-
-                    porcentaje = (
-                        avance / meta
-                        if meta > 0
-                        else 0
-                    )
-                    
-                    df_cac = df_filtrado[df_filtrado['NOM_ESTRATEGIA'] == cac]
-
+                    # Filtramos por CT específico
+                    df_ct = df_copes_base[df_copes_base['CT'] == ct]
                     instaladas = 0
-                    if 'FECHA_POSTEO' in df_cac.columns:
-                        instaladas = len(df_cac[
-                            (df_cac['FECHA_POSTEO'].dt.year == anio_seleccionado) & 
-                            (df_cac['FECHA_POSTEO'].dt.month == mes_seleccionado)
-                        ])
 
-                    efectividad = (instaladas / avance) if avance > 0 else 0
+                    # Calcular instaladas usando los filtros de año y mes igual que en CACs
+                    if 'FECHA_POSTEO' in df_ct.columns:
+                        try:
+                            instaladas = len(df_ct[
+                                (df_ct['FECHA_POSTEO'].dt.year == anio_seleccionado) &
+                                (df_ct['FECHA_POSTEO'].dt.month == mes_seleccionado)
+                            ])
+                        except NameError:
+                            instaladas = len(df_ct[df_ct['FECHA_POSTEO'].dt.month == mes_seleccionado])
 
-                    nombre_mostrar = nombres_simples.get(
-                        cac,
-                        cac
-                    )
+                    efectividad = (instaladas / venta) if venta > 0 else 0
 
-                    datos_area.append({
-                        "Area/CAC": nombre_mostrar,
-                        "Avance Mes": avance,
-                        "Asesores": asesores,
-                        "Meta": meta,
-                        "Avance": porcentaje,
+                    datos_cope.append({
+                        "Etiquetas de fila": ct,
+                        "Venta Mes": venta,
                         "Instaladas": instaladas,
                         "Efectividad": efectividad
                     })
 
-                    total_avance_mes += avance
-                    total_asesores += asesores
-                    total_meta += meta
+                    total_venta += venta
                     total_instaladas += instaladas
-                total_porcentaje = (total_avance_mes / total_meta) if total_meta > 0 else 0
-                total_efectividad = (total_instaladas / total_avance_mes) if total_avance_mes > 0 else 0 # <--- Efectividad Total
-            
 
-                # -------------------------------------------------
-                # TOTAL DEL ÁREA
-                # -------------------------------------------------
-                total_porcentaje = (
-                    total_avance_mes / total_meta
-                    if total_meta > 0
-                    else 0
-                )
+                total_efectividad = (total_instaladas / total_venta) if total_venta > 0 else 0
 
-                ranking_areas.append({
-                    "Área": area,
-                    "Cumplimiento %": total_porcentaje * 100
-                })
+                if datos_cope:
+                    df_copes_final = pd.DataFrame(datos_cope)
+                    # Ordenar alfabéticamente (como en la imagen de Excel)
+                    df_copes_final = df_copes_final.sort_values(by="Etiquetas de fila")
 
-                datos_area.insert(
-                    0,
-                    {
-                        "Area/CAC": f"[-]{area} (TOTAL)",
-                        "Avance Mes": total_avance_mes,
-                        "Asesores": total_asesores,
-                        "Meta": total_meta,
-                        "Avance": total_porcentaje,
+                    # Fila de Total General al final de la tabla
+                    fila_total = pd.DataFrame([{
+                        "Etiquetas de fila": "Total general",
+                        "Venta Mes": total_venta,
                         "Instaladas": total_instaladas,
                         "Efectividad": total_efectividad
-                    }
-                )
+                    }])
+                    df_copes_final = pd.concat([df_copes_final, fila_total], ignore_index=True)
 
-                df_area = pd.DataFrame(datos_area)
+                    altura_tabla_copes = ((len(df_copes_final) + 1) * 35 + 3)
 
-                altura_tabla = (
-                    (len(df_area) + 1) * 35 + 3
-                )
-                formato_columnas = {
-                    "Avance": "{:.0%}",
-                    "Efectividad": "{:.0%}"
-                }
+                    st.dataframe(
+                        df_copes_final
+                        .style
+                        .format({"Efectividad": "{:.0%}"})
+                        .map(colorear_semaforo, subset=['Efectividad']),
+                        width="content",
+                        hide_index=True,
+                        height=altura_tabla_copes,
+                        column_config={
+                            "Efectividad": st.column_config.ProgressColumn(
+                                "Efectividad",
+                                help="Efectividad (Instaladas / Venta Mes)",
+                                format="%.0f%%", # Sin decimales como en tu imagen
+                                min_value=0,
+                                max_value=1
+                            )
+                        }
+                    )
 
-                # -------------------------------------------------
-                # TABLA
-                # -------------------------------------------------
-                st.dataframe(
-                    df_area
-                    .style
-                    .format({"Avance": "{:.0%}"})
-                    .map(
-                        colorear_semaforo,
-                        subset=['Avance']
-                    ),
-                    width="content",
-                    hide_index=True,
-                    height=altura_tabla,
-                    column_config={
-                        "Avance": st.column_config.ProgressColumn(
-                            "Avance",
-                            help="Cumplimiento de la meta",
-                            format="%.2f",
-                            min_value=0,
-                            max_value=1
-                        ),
-                        "Efectividad": st.column_config.ProgressColumn(
-                            "Efectividad",
-                            help="Efectividad (Instaladas / Avance Mes)",
-                            format="%.2f", 
-                            min_value=0,
-                            max_value=1,   
-                        )
-                    }
-                )
+                    generar_boton_descarga(
+                        df_copes_final,
+                        nombre_archivo="Detalle_COPEs",
+                        btn_key="btn_descarga_copes"
+                    )
 
-                # -------------------------------------------------
-                # DETALLE PARA DESCARGA
-                # -------------------------------------------------
-                df_detalle_area = df_filtrado[
-                    df_filtrado['NOM_ESTRATEGIA'].isin(cacs)
-                ]
-
-                area_limpia = area.replace(
-                    " ",
-                    "_"
-                )
-
-                generar_boton_descarga(
-                    df_detalle_area,
-                    nombre_archivo=f"Detalle_{area_limpia}",
-                    btn_key=f"btn_descarga_{area_limpia}"
-                )
-
-                st.markdown("---")
-
-            # =====================================================
-            # RANKING GLOBAL
-            # =====================================================
-            st.divider()
-
-            if ranking_areas:
-
-                st.subheader(
-                    "📊 Ranking Global de Cumplimiento"
-                )
-
-                df_ranking = pd.DataFrame(
-                    ranking_areas
-                )
-
-                df_ranking = df_ranking.sort_values(
-                    by="Cumplimiento %",
-                    ascending=False
-                )
-
-                st.bar_chart(
-                    df_ranking.set_index(
-                        "Área"
-                    )["Cumplimiento %"]
-                )
+                else:
+                    st.info("No hay datos de COPEs para las áreas y fechas seleccionadas.")
 
             else:
-
-                st.info(
-                    "No hay datos para mostrar el ranking "
-                    "con los filtros seleccionados."
-                )
-
-        else:
-
-            st.error(
-                "La columna 'NOM_ESTRATEGIA' "
-                "no se encontró en la base de datos."
-            )
+                st.error("No se encontró la columna 'CT' en la base de datos para generar la vista de COPEs.")
 
     except Exception as e:
-
-        st.error(
-            f"Hubo un problema al leer el archivo. "
-            f"Error técnico: {e}"
-        )
+        st.error(f"Hubo un problema al procesar el archivo. Error técnico: {e}")
 
 else:
-
-    st.info(
-        "Obteniendo datos de Claro Drive "
-        "o en espera de subida manual..."
-    )
+    st.info("Obteniendo datos de Claro Drive o en espera de subida manual...")
