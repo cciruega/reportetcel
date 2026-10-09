@@ -21,24 +21,18 @@ st.set_page_config(
 
 # ---------------------------------------------------------
 # 🎨 ESTILOS CORPORATIVOS
-# HEADER COMPLETO + SIDEBAR FUNCIONAL
 # ---------------------------------------------------------
-
 st.markdown("""
 <style>
-
-/* =========================================================
-   OCULTAR FOOTER
-   ========================================================= */
 footer {
     display: none !important;
 }
-
 </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-
+# FUNCIONES AUXILIARES
+# ---------------------------------------------------------
 def colorear_semaforo(val):
     if isinstance(val, str):
         return ''
@@ -52,21 +46,18 @@ def colorear_semaforo(val):
 
 def generar_boton_descarga(df, nombre_archivo, btn_key):
     try:
-        # 1. Copiamos los datos para exportar
         df_export = df.copy()
         
-        # 2. Formateo SEGURO: Solo lo hace si la columna 'Avance' existe en los datos
+        # Formateo solo si existe Avance
         if 'Avance' in df_export.columns:
             df_export['Avance'] = pd.to_numeric(df_export['Avance'], errors='coerce').fillna(0)
             df_export['Avance'] = df_export['Avance'].apply(lambda x: f"{x:.0%}")
             
-        # 3. Intento de creación de Excel
         output = io.BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             df_export.to_excel(writer, index=False, sheet_name='Resultados')
         excel_data = output.getvalue()
         
-        # 4. Mostrar el botón de Excel
         st.download_button(
             label=f"📥 Descargar {nombre_archivo}.xlsx",
             data=excel_data,
@@ -76,9 +67,7 @@ def generar_boton_descarga(df, nombre_archivo, btn_key):
         )
         
     except Exception as e:
-        # PLAN B INFALIBLE: Si algo falla, generamos un CSV nativo
         csv_data = df_export.to_csv(index=False).encode('utf-8')
-        
         st.download_button(
             label=f"📥 Descargar {nombre_archivo} (CSV)",
             data=csv_data,
@@ -86,7 +75,10 @@ def generar_boton_descarga(df, nombre_archivo, btn_key):
             mime="text/csv",
             key=f"{btn_key}_csv"
         )
-# 1. Diccionarios de configuración
+
+# ---------------------------------------------------------
+# DICCIONARIOS DE CONFIGURACIÓN
+# ---------------------------------------------------------
 estructura_cac = {
     "CIUDAD VICTORIA": ["2008604 TCC CIU100 MANTE4", "2008604 TCC CIU100 VICTORIA II4", "2008604 TCC CIU100 VICTORIA4"],
     "MATAMOROS-REYNOSA": ["2008604 TCC MAT101 MATAMOROS II4", "2008604 TCC MAT101 MATAMOROS4", "2008604 TCC REY115 REYNOSA II4", "2008604 TCC REY115 REYNOSA III4", "2008604 TCC REY116 REYNOSA I4", "2008604 TCC REY116 REYNOSA IV4"],
@@ -95,6 +87,16 @@ estructura_cac = {
     "MONTERREY 3": ["2008604 TCC MON111 APODACA4", "2008604 TCC MON111 MTY SUN MALL VIP4", "2008604 TCC MON112 EXPRESS MONTEMORELOS"],
     "NUEVO LAREDO": ["2008604 TCC NUE114 LAREDO I4", "2008604 TCC NUE114 LAREDO II4"],
     "TAMPICO": ["2008604 TCC TAM121 TAMPICO I4", "2008604 TCC TAM122 TAMPICO II4", "2008604 TCC TAM122 TAMPICO III4", "2008604 TCC TAM122 TAMPICO IV4"]
+}
+
+estructura_cope = {
+    "CIUDAD VICTORIA": ["CT CIUDAD MANTE", "CT CIUDAD VICTORIA"],
+    "MATAMOROS-REYNOSA": ["CT CIUDAD MIGUEL ALEMAN", "CT MATAMOROS", "CT REYNOSA", "CT RIO BRAVO", "CT SAN FERNANDO", "CT VALLE HERMOSO"],
+    "MONTERREY 1": ["CT COLON (MTY)", "CT GONZALITOS", "CT LINCOLN", "CT REVOLUCION", "CT SAN PEDRO [NL]"],
+    "MONTERREY 2": ["CT LA SILLA", "CT PUENTES", "CT SANTA CATARINA", "CT SANTA FE [MTY]", "CT UNIVERSIDAD (NL)"],
+    "MONTERREY 3": ["CT APODACA", "CT CADEREYTA", "CT GENERAL ESCOBEDO (BRISAS)", "CT LINARES", "CT MONTEMORELOS"],
+    "NUEVO LAREDO": ["CT CIUDAD ANAHUAC", "CT NUEVO LAREDO", "CT SABINAS HIDALGO"],
+    "TAMPICO": ["CT TAMPICO HIDALGO", "CT TAMPICO MADERO"]
 }
 
 catalogo_asesores = {
@@ -107,7 +109,6 @@ catalogo_asesores = {
     "2008604 TCC TAM121 TAMPICO I4": 34, "2008604 TCC TAM122 TAMPICO II4": 20, "2008604 TCC TAM122 TAMPICO III4": 23, "2008604 TCC TAM122 TAMPICO IV4": 23
 }
 
-# Diccionario para nombres limpios en la vista del portal
 nombres_simples = {
     "2008604 TCC CIU100 MANTE4": "MANTE",
     "2008604 TCC CIU100 VICTORIA II4": "VICTORIA II",
@@ -121,534 +122,4 @@ nombres_simples = {
     "2008604 TCC MON103 COUNTRY4": "COUNTRY",
     "2008604 TCC MON103 EXPRESS ESFERA4": "EXPRESS ESFERA",
     "2008604 TCC MON103 EXPRESS NUEVO SUR4": "EXPRESS NUEVO SUR",
-    "2008604 TCC MON103 SATELITE4": "SATELITE",
-    "2008604 TCC MON103 VALLE ORIENTE4": "VALLE ORIENTE",
-    "2008604 TCC MON104 CUMBRES4": "CUMBRES",
-    "2008604 TCC MON104 SENDERO LINCOLN4": "SENDERO LINCOLN",
-    "2008604 TCC MON104 SERVICIO TECNICO Tlc Y CENTRo": "SERVICIO TECNICO Tlc Y CENTRo",
-    "2008604 TCC MON105 CENTRIKA4": "CENTRIKA",
-    "2008604 TCC MON105 GALERIAS4": "GALERIAS",
-    "2008604 TCC MON106 CENTRO4": "CENTRO",
-    "2008604 TCC MON106 EXPRESS FASHION DRIVE4": "EXPRESS FASHION DRIVE",
-    "2008604 TCC MON106 EXPRESS HUMBERTO LOBO4": "EXPRESS HUMBERTO LOBO",
-    "2008604 TCC MON106 EXPRESS PASEO TEC": "EXPRESS PASEO TEC",
-    "2008604 TCC MON106 EXPRESS VILLAS VALLE4": "EXPRESS VILLAS VALLE",
-    "2008604 TCC MON106 PUNTO VALLE4": "PUNTO VALLE",
-    "2008604 TCC MON106 SAN AGUSTIN4": "SAN AGUSTIN",
-    "2008604 TCC MON107 EXPOSICION4": "EXPOSICION",
-    "2008604 TCC MON107 GUADALUPE4": "GUADALUPE",
-    "2008604 TCC MON108 ANAHUAC4": "ANAHUAC",
-    "2008604 TCC MON108 EXPRESS PLAZA FIESTA ANAHUAC4": "EXPRESS PLAZA FIESTA ANAHUAC",
-    "2008604 TCC MON108 PLAZA BELLA4": "PLAZA BELLA",
-    "2008604 TCC MON108 SANTA CATARINA4": "SANTA CATARINA",
-    "2008604 TCC MON109 CITADEL4": "CITADEL",
-    "2008604 TCC MON109 LAS AMERICAS4": "LAS AMERICAS",
-    "2008604 TCC MON110 ESCOBEDO4": "ESCOBEDO",
-    "2008604 TCC MON111 APODACA4": "APODACA",
-    "2008604 TCC MON111 MTY SUN MALL VIP4": "SUN MALL VIP",
-    "2008604 TCC MON112 EXPRESS MONTEMORELOS": "MONTEMORELOS",
-    "2008604 TCC NUE114 LAREDO I4": "LAREDO I",
-    "2008604 TCC NUE114 LAREDO II4": "LAREDO II",
-    "2008604 TCC TAM121 TAMPICO I4": "TAMPICO I",
-    "2008604 TCC TAM122 TAMPICO II4": "TAMPICO II",
-    "2008604 TCC TAM122 TAMPICO III4": "TAMPICO III",
-    "2008604 TCC TAM122 TAMPICO IV4": "TAMPICO IV"
-}
-
-mapa_estados = {
-    "Nuevo León": [
-        "MONTERREY 1",
-        "MONTERREY 2",
-        "MONTERREY 3"
-    ],
-    "Tamaulipas": [
-        "CIUDAD VICTORIA",
-        "MATAMOROS-REYNOSA",
-        "NUEVO LAREDO",
-        "TAMPICO"
-    ]
-}
-
-st.markdown("<h1 style='text-align: center;'>Telmex-Telcel</h1>", unsafe_allow_html=True)
-
-st.markdown("---")
-# Función para cargar el archivo sorteando las primeras filas vacías
-def cargar_datos(archivo):
-    df_temp = pd.read_excel(archivo, sheet_name="Detalle1", header=2)
-    if 'NOM_ESTRATEGIA' in df_temp.columns:
-        return df_temp
-    else:
-        return pd.read_excel(archivo, sheet_name="Detalle1")
-
-# ---------------------------------------------------------
-# ☁️ LÓGICA DE DETECCIÓN AUTOMÁTICA (CLARO DRIVE)
-# ---------------------------------------------------------
-@st.cache_data(ttl=600) # Cacheamos por 10 mins para no saturar ClaroDrive
-def obtener_archivo_clarodrive():
-    # Truco de ClaroDrive: Agregamos /download a tu liga para bajar la carpeta
-    url_carpeta = "https://i0000.clarodrive.com/s/FSXKpraaEE8owPZ"
-    url_descarga = url_carpeta.rstrip('/') + '/download'
-    
-    try:
-        respuesta = requests.get(url_descarga, timeout=15)
-        if respuesta.status_code == 200:
-            # Leemos el archivo ZIP directamente en la memoria del servidor
-            with zipfile.ZipFile(io.BytesIO(respuesta.content)) as archivo_zip:
-                # Buscamos todos los archivos Excel (ignorando los temporales que empiezan con ~)
-                excel_infos = [info for info in archivo_zip.infolist() if info.filename.endswith('.xlsx') and not info.filename.startswith('~')]
-                
-                if excel_infos:
-                    # Si hay varios, tomamos el más reciente por fecha de modificación
-                    excel_reciente = max(excel_infos, key=lambda x: x.date_time)
-                    
-                    # Lo extraemos a la memoria
-                    archivo_bytes = io.BytesIO(archivo_zip.read(excel_reciente.filename))
-                    
-                    # =========================================================
-                    # 🕒 AJUSTE DE ZONA HORARIA (UTC A CENTRO DE MÉXICO)
-                    # =========================================================
-                    fecha_tupla = excel_reciente.date_time 
-                    
-                    # 1. Convertimos la tupla del ZIP a un formato de fecha manipulable
-                    fecha_utc = datetime.datetime(
-                        year=fecha_tupla[0], month=fecha_tupla[1], day=fecha_tupla[2],
-                        hour=fecha_tupla[3], minute=fecha_tupla[4], second=fecha_tupla[5]
-                    )
-                    
-                    # 2. Le restamos 6 horas (Diferencia de México respecto a UTC)
-                    fecha_mexico = fecha_utc - datetime.timedelta(hours=6)
-                    
-                    # 3. Lo convertimos al texto final
-                    fecha_str = fecha_mexico.strftime('%d/%m/%Y %H:%M:%S')
-                    # =========================================================
-                    
-                    return archivo_bytes.getvalue(), excel_reciente.filename, fecha_str
-    except Exception:
-        pass # Si falla el internet del servidor o la liga, no rompe el programa
-    
-    return None, None, None
-
-# Obtenemos los bytes en lugar del objeto BytesIO para que Streamlit pueda cachear
-bytes_automatico, nombre_corto, fecha_actualizacion = obtener_archivo_clarodrive()
-archivo_a_procesar = None
-
-col1, col2 = st.columns([2, 1])
-with col1:
-    if bytes_automatico:
-        # Reconstruimos el BytesIO a partir de los bytes cacheados
-        archivo_automatico = io.BytesIO(bytes_automatico)
-        st.success(f"☁️ **Base de datos (Claro Drive):** {nombre_corto}  \n⏱️ **Actualizado:** {fecha_actualizacion}")
-        archivo_a_procesar = archivo_automatico
-    else:
-        st.warning("⚠️ No se pudo conectar con Claro Drive o la carpeta está vacía.")
-
-with col2:
-    # Si Claro Drive falla, habilitamos la subida manual como "Plan B"
-    usar_manual = st.checkbox("Subir archivo manualmente", value=False if bytes_automatico else True)
-
-if usar_manual:
-    archivo_a_procesar = st.file_uploader("Arrastra aquí tu archivo de Excel", type=['xlsx', 'xls'])
-
-st.divider()
-
-# ---------------------------------------------------------
-# PROCESAMIENTO DEL ARCHIVO
-# ---------------------------------------------------------
-if archivo_a_procesar:
-
-    try:
-
-        # ---------------------------------------------------------
-        # CARGAR ARCHIVO
-        # ---------------------------------------------------------
-        df = cargar_datos(archivo_a_procesar)
-
-        st.sidebar.header("Filtros Principales")
-
-        # ---------------------------------------------------------
-        # NUEVO: FILTRO TIPO DE VISTA (CACs vs COPEs)
-        # ---------------------------------------------------------
-        tipo_vista = st.sidebar.radio(
-            "Selecciona la Vista:",
-            options=["CACs", "COPEs"],
-            index=0,
-            help="Elige si deseas ver el reporte por CACs (default) o agrupado por COPEs (CT)."
-        )
-
-        st.sidebar.markdown("---")
-
-        # ---------------------------------------------------------
-        # 1. FILTRO DE ESTADO - SELECCIÓN MÚLTIPLE
-        # ---------------------------------------------------------
-        estados_disponibles = list(mapa_estados.keys())
-        
-        estados_seleccionados = st.sidebar.multiselect(
-            "Selecciona Estado:",
-            options=estados_disponibles,
-            default=estados_disponibles,
-            help="Puedes seleccionar uno o varios estados."
-        )
-        
-        if not estados_seleccionados:
-            st.sidebar.warning("Selecciona al menos un Estado.")
-            st.stop()
-        
-        # ---------------------------------------------------------
-        # 2. OBTENER ÁREAS DE LOS ESTADOS SELECCIONADOS
-        # ---------------------------------------------------------
-        areas_disponibles = []
-        for estado in estados_seleccionados:
-            areas_disponibles.extend(mapa_estados.get(estado, []))
-        
-        areas_disponibles = list(dict.fromkeys(areas_disponibles))
-        
-        # ---------------------------------------------------------
-        # 3. FILTRO DE ÁREA - SELECCIÓN MÚLTIPLE
-        # ---------------------------------------------------------
-        area_seleccionada = st.sidebar.multiselect(
-            "Selecciona Área:",
-            options=areas_disponibles,
-            default=areas_disponibles,
-            help="Puedes seleccionar una o varias áreas."
-        )
-        
-        if not area_seleccionada:
-            st.sidebar.warning("Selecciona al menos un Área.")
-            st.stop()
-        
-        # ---------------------------------------------------------
-        # 4. FILTRAR ESTRUCTURA CAC
-        # ---------------------------------------------------------
-        estructura_cac_filtrada = {
-            k: v for k, v in estructura_cac.items() if k in area_seleccionada
-        }
-
-        # =========================================================
-        # 5. FILTRO DE FECHA_CAPTURA
-        # =========================================================
-        if 'FECHA_CAPTURA' in df.columns:
-
-            df['FECHA_CAPTURA'] = pd.to_datetime(df['FECHA_CAPTURA'], errors='coerce')
-            fecha_hoy = datetime.datetime.now()
-            anio_actual = fecha_hoy.year
-            mes_actual = fecha_hoy.month
-
-            anios_disponibles = sorted(
-                df['FECHA_CAPTURA'].dt.year.dropna().unique().astype(int).tolist(),
-                reverse=True
-            )
-
-            if anios_disponibles:
-                if anio_actual in anios_disponibles:
-                    anio_predeterminado = anio_actual
-                else:
-                    anio_predeterminado = anios_disponibles[0]
-
-                indice_anio = anios_disponibles.index(anio_predeterminado)
-                anio_seleccionado = st.sidebar.selectbox("Año de Captura", options=anios_disponibles, index=indice_anio)
-
-                df_temp_anio = df[df['FECHA_CAPTURA'].dt.year == anio_seleccionado]
-                meses_disponibles = sorted(
-                    df_temp_anio['FECHA_CAPTURA'].dt.month.dropna().unique().astype(int).tolist(),
-                    reverse=True
-                )
-
-                if meses_disponibles:
-                    if (anio_seleccionado == anio_actual and mes_actual in meses_disponibles):
-                        mes_predeterminado = mes_actual
-                    else:
-                        mes_predeterminado = meses_disponibles[0]
-
-                    indice_mes = meses_disponibles.index(mes_predeterminado)
-                    mes_seleccionado = st.sidebar.selectbox("Mes de Captura", options=meses_disponibles, index=indice_mes)
-
-                    df_filtrado = df[
-                        (df['FECHA_CAPTURA'].dt.year == anio_seleccionado) &
-                        (df['FECHA_CAPTURA'].dt.month == mes_seleccionado)
-                    ]
-                else:
-                    st.warning(f"No hay meses disponibles para el año {anio_seleccionado}.")
-                    df_filtrado = df.copy()
-            else:
-                st.warning("No se encontraron fechas válidas en FECHA_CAPTURA.")
-                df_filtrado = df.copy()
-
-        # =========================================================
-        # 5. RESPALDO: MES_CAPTURA
-        # =========================================================
-        elif 'MES_CAPTURA' in df.columns:
-            df['MES_CAPTURA'] = pd.to_datetime(df['MES_CAPTURA'], errors='coerce')
-            meses_disponibles = sorted(
-                df['MES_CAPTURA'].dt.month.dropna().unique().astype(int).tolist(),
-                reverse=True
-            )
-
-            if meses_disponibles:
-                mes_actual = datetime.datetime.now().month
-                if mes_actual in meses_disponibles:
-                    mes_predeterminado = mes_actual
-                else:
-                    mes_predeterminado = meses_disponibles[0]
-
-                indice_mes = meses_disponibles.index(mes_predeterminado)
-                mes_seleccionado = st.sidebar.selectbox("Mes de Captura (Número)", options=meses_disponibles, index=indice_mes)
-
-                df_filtrado = df[df['MES_CAPTURA'].dt.month == mes_seleccionado]
-            else:
-                st.warning("No se encontraron meses válidos en MES_CAPTURA.")
-                df_filtrado = df.copy()
-
-        # =========================================================
-        # SIN FECHAS VÁLIDAS
-        # =========================================================
-        else:
-            st.error("No se encontró 'FECHA_CAPTURA' ni 'MES_CAPTURA'. Verifica el archivo.")
-            df_filtrado = df.copy()
-
-        # =========================================================
-        # 6. LÓGICA DE VISTAS (CACs vs COPEs)
-        # =========================================================
-        if tipo_vista == "CACs":
-            
-            if 'NOM_ESTRATEGIA' in df_filtrado.columns:
-                resumen_cacs = (
-                    df_filtrado
-                    .groupby('NOM_ESTRATEGIA')
-                    .size()
-                    .reset_index(name='Avance Mes')
-                )
-
-                st.header("Resultados por CAC asociado al Area TMX")
-
-                ranking_areas = []
-
-                for area, cacs in estructura_cac_filtrada.items():
-                    st.subheader(area)
-
-                    datos_area = []
-                    total_avance_mes = 0
-                    total_asesores = 0
-                    total_meta = 0
-                    total_instaladas = 0
-
-                    for cac in cacs:
-                        avance_fila = resumen_cacs[resumen_cacs['NOM_ESTRATEGIA'] == cac]
-                        avance = avance_fila['Avance Mes'].values[0] if not avance_fila.empty else 0
-                        asesores = catalogo_asesores.get(cac, 0)
-                        meta = asesores * 2
-                        porcentaje = (avance / meta if meta > 0 else 0)
-                        
-                        df_cac = df_filtrado[df_filtrado['NOM_ESTRATEGIA'] == cac]
-                        instaladas = 0
-                        if 'FECHA_POSTEO' in df_cac.columns:
-                            try:
-                                instaladas = len(df_cac[
-                                    (df_cac['FECHA_POSTEO'].dt.year == anio_seleccionado) & 
-                                    (df_cac['FECHA_POSTEO'].dt.month == mes_seleccionado)
-                                ])
-                            except NameError:
-                                # Fallback por si usamos la columna 'MES_CAPTURA' y 'anio_seleccionado' no existe
-                                instaladas = len(df_cac[df_cac['FECHA_POSTEO'].dt.month == mes_seleccionado])
-
-                        efectividad = (instaladas / avance) if avance > 0 else 0
-                        nombre_mostrar = nombres_simples.get(cac, cac)
-
-                        datos_area.append({
-                            "Area/CAC": nombre_mostrar,
-                            "Avance Mes": avance,
-                            "Asesores": asesores,
-                            "Meta": meta,
-                            "Avance": porcentaje,
-                            "Instaladas": instaladas,
-                            "Efectividad": efectividad
-                        })
-
-                        total_avance_mes += avance
-                        total_asesores += asesores
-                        total_meta += meta
-                        total_instaladas += instaladas
-
-                    total_porcentaje = (total_avance_mes / total_meta) if total_meta > 0 else 0
-                    total_efectividad = (total_instaladas / total_avance_mes) if total_avance_mes > 0 else 0 
-
-                    ranking_areas.append({
-                        "Área": area,
-                        "Cumplimiento %": total_porcentaje * 100
-                    })
-
-                    datos_area.insert(
-                        0,
-                        {
-                            "Area/CAC": f"[-]{area} (TOTAL)",
-                            "Avance Mes": total_avance_mes,
-                            "Asesores": total_asesores,
-                            "Meta": total_meta,
-                            "Avance": total_porcentaje,
-                            "Instaladas": total_instaladas,
-                            "Efectividad": total_efectividad
-                        }
-                    )
-
-                    df_area = pd.DataFrame(datos_area)
-                    altura_tabla = ((len(df_area) + 1) * 35 + 3)
-
-                    st.dataframe(
-                        df_area
-                        .style
-                        .format({"Avance": "{:.0%}"})
-                        .map(colorear_semaforo, subset=['Avance']),
-                        width="content",
-                        hide_index=True,
-                        height=altura_tabla,
-                        column_config={
-                            "Avance": st.column_config.ProgressColumn(
-                                "Avance",
-                                help="Cumplimiento de la meta",
-                                format="%.2f",
-                                min_value=0,
-                                max_value=1
-                            ),
-                            "Efectividad": st.column_config.ProgressColumn(
-                                "Efectividad",
-                                help="Efectividad (Instaladas / Avance Mes)",
-                                format="%.2f", 
-                                min_value=0,
-                                max_value=1,   
-                            )
-                        }
-                    )
-
-                    df_detalle_area = df_filtrado[df_filtrado['NOM_ESTRATEGIA'].isin(cacs)]
-                    area_limpia = area.replace(" ", "_")
-                    generar_boton_descarga(
-                        df_detalle_area,
-                        nombre_archivo=f"Detalle_{area_limpia}",
-                        btn_key=f"btn_descarga_{area_limpia}"
-                    )
-
-                    st.markdown("---")
-
-                st.divider()
-
-                if ranking_areas:
-                    st.subheader("📊 Ranking Global de Cumplimiento")
-                    df_ranking = pd.DataFrame(ranking_areas)
-                    df_ranking = df_ranking.sort_values(by="Cumplimiento %", ascending=False)
-                    st.bar_chart(df_ranking.set_index("Área")["Cumplimiento %"])
-                else:
-                    st.info("No hay datos para mostrar el ranking con los filtros seleccionados.")
-
-            else:
-                st.error("La columna 'NOM_ESTRATEGIA' no se encontró en la base de datos.")
-
-        # =========================================================
-        # 7. RESULTADOS POR COPEs (NUEVA LÓGICA)
-        # =========================================================
-        elif tipo_vista == "COPEs":
-            if 'CT' in df_filtrado.columns:
-                st.header("Resultados por COPEs (CT)")
-
-                # Filtrar para mantener congruencia con las áreas seleccionadas (por sus CACs)
-                df_copes_base = df_filtrado.copy()
-                if 'NOM_ESTRATEGIA' in df_copes_base.columns:
-                    cacs_validos = [cac for cacs in estructura_cac_filtrada.values() for cac in cacs]
-                    if cacs_validos:
-                        df_copes_base = df_copes_base[df_copes_base['NOM_ESTRATEGIA'].isin(cacs_validos)]
-
-                # Agrupar datos por la columna CT
-                resumen_copes = (
-                    df_copes_base
-                    .groupby('CT')
-                    .size()
-                    .reset_index(name='Venta Mes')
-                )
-
-                datos_cope = []
-                total_venta = 0
-                total_instaladas = 0
-
-                cts_unicos = resumen_copes['CT'].unique()
-
-                for ct in cts_unicos:
-                    venta = resumen_copes[resumen_copes['CT'] == ct]['Venta Mes'].values[0]
-
-                    # Filtramos por CT específico
-                    df_ct = df_copes_base[df_copes_base['CT'] == ct]
-                    instaladas = 0
-
-                    # Calcular instaladas usando los filtros de año y mes igual que en CACs
-                    if 'FECHA_POSTEO' in df_ct.columns:
-                        try:
-                            instaladas = len(df_ct[
-                                (df_ct['FECHA_POSTEO'].dt.year == anio_seleccionado) &
-                                (df_ct['FECHA_POSTEO'].dt.month == mes_seleccionado)
-                            ])
-                        except NameError:
-                            instaladas = len(df_ct[df_ct['FECHA_POSTEO'].dt.month == mes_seleccionado])
-
-                    efectividad = (instaladas / venta) if venta > 0 else 0
-
-                    datos_cope.append({
-                        "Etiquetas de fila": ct,
-                        "Venta Mes": venta,
-                        "Instaladas": instaladas,
-                        "Efectividad": efectividad
-                    })
-
-                    total_venta += venta
-                    total_instaladas += instaladas
-
-                total_efectividad = (total_instaladas / total_venta) if total_venta > 0 else 0
-
-                if datos_cope:
-                    df_copes_final = pd.DataFrame(datos_cope)
-                    # Ordenar alfabéticamente (como en la imagen de Excel)
-                    df_copes_final = df_copes_final.sort_values(by="Etiquetas de fila")
-
-                    # Fila de Total General al final de la tabla
-                    fila_total = pd.DataFrame([{
-                        "Etiquetas de fila": "Total general",
-                        "Venta Mes": total_venta,
-                        "Instaladas": total_instaladas,
-                        "Efectividad": total_efectividad
-                    }])
-                    df_copes_final = pd.concat([df_copes_final, fila_total], ignore_index=True)
-
-                    altura_tabla_copes = ((len(df_copes_final) + 1) * 35 + 3)
-
-                    st.dataframe(
-                        df_copes_final
-                        .style
-                        .format({"Efectividad": "{:.0%}"})
-                        .map(colorear_semaforo, subset=['Efectividad']),
-                        width="content",
-                        hide_index=True,
-                        height=altura_tabla_copes,
-                        column_config={
-                            "Efectividad": st.column_config.ProgressColumn(
-                                "Efectividad",
-                                help="Efectividad (Instaladas / Venta Mes)",
-                                format="%.0f%%", # Sin decimales como en tu imagen
-                                min_value=0,
-                                max_value=1
-                            )
-                        }
-                    )
-
-                    generar_boton_descarga(
-                        df_copes_final,
-                        nombre_archivo="Detalle_COPEs",
-                        btn_key="btn_descarga_copes"
-                    )
-
-                else:
-                    st.info("No hay datos de COPEs para las áreas y fechas seleccionadas.")
-
-            else:
-                st.error("No se encontró la columna 'CT' en la base de datos para generar la vista de COPEs.")
-
-    except Exception as e:
-        st.error(f"Hubo un problema al procesar el archivo. Error técnico: {e}")
-
-else:
-    st.info("Obteniendo datos de Claro Drive o en espera de subida manual...")
+    "2008604 TCC MON103 SATEL
